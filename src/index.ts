@@ -1,9 +1,13 @@
 import {
+  ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { VREPanelWidget } from './widget';
+import { IVREPanelSettings } from './VREPanel';
+import { extensionIcon } from './icons';
 
 /**
  * Initialization data for the NaaVRE-containerizer-jupyterlab extension.
@@ -12,20 +16,49 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: 'NaaVRE-containerizer-jupyterlab:plugin',
   description: 'NaaVRE cells containerizer frontend on Jupyter Lab',
   autoStart: true,
+  requires: [ILayoutRestorer],
   optional: [ISettingRegistry],
-  activate: (app: JupyterFrontEnd, settingRegistry: ISettingRegistry | null) => {
-    console.log('JupyterLab extension NaaVRE-containerizer-jupyterlab is activated!');
+  activate: (
+    app: JupyterFrontEnd,
+    restorer: ILayoutRestorer,
+    settingRegistry: ISettingRegistry | null
+  ) => {
+    console.log(
+      'JupyterLab extension NaaVRE-containerizer-jupyterlab is activated!'
+    );
+
+    let widget: VREPanelWidget;
 
     if (settingRegistry) {
-      settingRegistry
-        .load(plugin.id)
-        .then(settings => {
-          console.log('NaaVRE-containerizer-jupyterlab settings loaded:', settings.composite);
+      const loadSettings = settingRegistry.load(plugin.id);
+
+      Promise.all([loadSettings, app.restored])
+        .then(([settings]) => {
+          function onSettingsChanged(
+            settings: ISettingRegistry.ISettings
+          ): void {
+            widget.updateSettings(
+              settings.composite as Partial<IVREPanelSettings>
+            );
+          }
+          settings.changed.connect(onSettingsChanged);
+          onSettingsChanged(settings);
         })
         .catch(reason => {
-          console.error('Failed to load settings for NaaVRE-containerizer-jupyterlab.', reason);
+          console.error(
+            'Failed to load settings for NaaVRE-containerizer-jupyterlab.',
+            reason
+          );
         });
     }
+
+    app.started.then(() => {
+      widget = new VREPanelWidget();
+      widget.id = 'NaaVRE-containerizer-jupyterlab';
+      widget.title.icon = extensionIcon;
+      widget.title.caption = 'NaaVRE containerizer';
+      restorer.add(widget, widget.id);
+    });
   }
 };
 

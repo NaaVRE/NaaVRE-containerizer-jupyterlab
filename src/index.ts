@@ -3,8 +3,9 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
+import { INotebookTracker } from '@jupyterlab/notebook';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
 import { VREPanelWidget } from './widget';
 import { IVREPanelSettings } from './VREPanel';
 import { extensionIcon } from './icons';
@@ -16,11 +17,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: 'NaaVRE-containerizer-jupyterlab:plugin',
   description: 'NaaVRE cells containerizer frontend on Jupyter Lab',
   autoStart: true,
-  requires: [ILayoutRestorer],
+  requires: [ILayoutRestorer, INotebookTracker],
   optional: [ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
     restorer: ILayoutRestorer,
+    tracker: INotebookTracker,
     settingRegistry: ISettingRegistry | null
   ) => {
     console.log(
@@ -53,7 +55,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     }
 
     app.started.then(() => {
-      widget = new VREPanelWidget();
+      widget = new VREPanelWidget(tracker);
       widget.id = 'NaaVRE-containerizer-jupyterlab';
       widget.title.icon = extensionIcon;
       widget.title.caption = 'NaaVRE containerizer';

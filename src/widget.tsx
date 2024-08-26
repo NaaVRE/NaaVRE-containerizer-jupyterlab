@@ -7,12 +7,15 @@ import {
   IVREPanelSettings,
   DefaultVREPanelSettings
 } from './VREPanel';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 export class VREPanelWidget extends ReactWidget {
+  tracker: INotebookTracker;
   settings: IVREPanelSettings = DefaultVREPanelSettings;
 
-  constructor() {
+  constructor(tracker: INotebookTracker) {
     super();
+    this.tracker = tracker;
   }
 
   updateSettings(settings: Partial<IVREPanelSettings>) {
@@ -20,7 +23,9 @@ export class VREPanelWidget extends ReactWidget {
     this.update();
   }
 
-  render(): React.ReactElement {
-    return <VREPanelComponent settings={this.settings} />;
+  render() {
+    return (
+      <VREPanelComponent tracker={this.tracker} settings={this.settings} />
+    );
   }
 }

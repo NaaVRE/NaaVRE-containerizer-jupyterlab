@@ -61,6 +61,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
       widget.title.caption = 'NaaVRE containerizer';
       restorer.add(widget, widget.id);
     });
+
+    app.restored.then(() => {
+      if (!widget.isAttached) {
+        app.shell.add(widget, 'left');
+      }
+    });
   }
 };
 

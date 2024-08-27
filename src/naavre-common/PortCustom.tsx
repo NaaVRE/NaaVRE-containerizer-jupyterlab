@@ -12,10 +12,10 @@ const PortContainerRight = styled.div`
   justify-content: flex-end;
 `;
 
-const PortDot = styled.div`
+const PortDot = styled.div<{ $color?: string }>`
   width: 20px;
   height: 20px;
-  background: ${(props: { color: any }) => props.color};
+  background: ${props => props.$color};
   border-radius: 50%;
   cursor: pointer;
 `;

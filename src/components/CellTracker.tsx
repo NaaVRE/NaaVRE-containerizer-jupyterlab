@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { requestAPI } from '../naavre-common/handler';
+import { requestAPI, NaaVREExternalService } from '../naavre-common/handler';
 import { CellPreview } from '../naavre-common/CellPreview';
 import { VRECell } from '../naavre-common/types';
 import { INotebookModel, Notebook, NotebookPanel } from '@jupyterlab/notebook';
@@ -29,9 +29,11 @@ import { AddCellDialog } from './AddCellDialog';
 import CloseIcon from '@material-ui/icons/Close';
 import { emptyChart } from '../naavre-common/emptyChart';
 import { Slot } from '@lumino/signaling';
+import { IVREPanelSettings } from '../VREPanel';
 
 interface IProps {
   notebook: NotebookPanel | null;
+  settings: IVREPanelSettings;
 }
 
 interface IState {
@@ -126,21 +128,18 @@ export class CellTracker extends React.Component<IProps, IState> {
   }
 
   async loadBaseImages() {
-    try {
-      const baseImagesData = await requestAPI<any>(
-        'containerizer/baseimagetags',
-        { method: 'GET' }
-      );
-      // Convert object data to an array of objects
-      const updatedBaseImages = Object.entries(baseImagesData).map(
-        ([name, image]) => ({ name, image })
-      );
-      console.log('updatedBaseImages');
-      console.log(updatedBaseImages);
-      this.setState({ baseImages: updatedBaseImages });
-    } catch (error) {
-      console.log(error);
-    }
+    NaaVREExternalService('GET', `${this.props.settings.containerizerServiceUrl}/base-image-tags`)
+      .then(data => {
+        const updatedBaseImages = Object.entries(data).map(
+          ([name, image]) => ({ name, image })
+        );
+        console.log('updatedBaseImages');
+        console.log(updatedBaseImages);
+        this.setState({ baseImages: updatedBaseImages });
+      })
+      .catch(reason => {
+        console.log(reason);
+      });
   }
 
   typesUpdate = async (

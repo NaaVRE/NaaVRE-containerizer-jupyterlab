@@ -6,9 +6,13 @@ import { CellTracker } from './components/CellTracker';
 import { Slot } from '@lumino/signaling';
 import { Divider } from '@material-ui/core';
 
-export interface IVREPanelSettings {}
+export interface IVREPanelSettings {
+  containerizerServiceUrl: string | null;
+}
 
-export const DefaultVREPanelSettings: IVREPanelSettings = {};
+export const DefaultVREPanelSettings: IVREPanelSettings = {
+  containerizerServiceUrl: null
+};
 
 export const VREPanelComponent = ({
   tracker,
@@ -48,7 +52,7 @@ export const VREPanelComponent = ({
             <Divider />
           </div>
           <div style={{ marginTop: 5 }}>
-            <CellTracker notebook={tracker.currentWidget} />
+            <CellTracker notebook={tracker.currentWidget} settings={settings} />
           </div>
         </div>
       </div>

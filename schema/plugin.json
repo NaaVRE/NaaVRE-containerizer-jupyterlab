@@ -3,6 +3,13 @@
   "title": "NaaVRE-containerizer-jupyterlab",
   "description": "NaaVRE-containerizer-jupyterlab settings.",
   "type": "object",
-  "properties": {},
+  "properties": {
+    "containerizerServiceUrl": {
+      "type": ["string", "null"],
+      "title": "Containerizer service URL",
+      "description": "URL of the containerizer service (example: https://my-naavre.example.com/NaaVRE-containerizer-service)",
+      "default": null
+    }
+  },
   "additionalProperties": false
 }

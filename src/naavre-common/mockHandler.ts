@@ -217,21 +217,25 @@ export async function NaaVREExternalService(
   headers = {},
   data = {}
 ): Promise<INaaVREExternalServiceResponse | string | object> {
-  let resp: INaaVREExternalServiceResponse | string | object;
+  let resp: INaaVREExternalServiceResponse | string | object = {
+    status_code: 404,
+    reason: 'Cannot mock this request',
+    header: {},
+    content: ''
+  };
 
   if (url.endsWith('/NaaVRE-containerizer-service/base-image-tags')) {
-    resp = baseImageTagsResponse;
+    if (method === 'GET') {
+      resp = baseImageTagsResponse;
+    }
   } else if (url.endsWith('/NaaVRE-containerizer-service/extract')) {
-    resp = extractResponse;
+    if (method === 'POST') {
+      resp = extractResponse;
+    }
   } else if (url.endsWith('/NaaVRE-containerizer-service/containerize')) {
-    resp = containerizeResponse;
-  } else {
-    resp = {
-      status_code: 404,
-      reason: 'Cannot mock this request',
-      header: {},
-      content: ''
-    };
+    if (method === 'POST') {
+      resp = containerizeResponse;
+    }
   }
 
   console.log('Mocking NaaVREExternalService', {

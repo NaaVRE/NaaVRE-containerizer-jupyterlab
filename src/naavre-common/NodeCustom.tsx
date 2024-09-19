@@ -47,7 +47,7 @@ const NodeTitle = styled.span`
   text-overflow: ellipsis;
 `;
 
-export const NodeCustom = (
+const NodeCustomElement = (
   { node, children, ...otherProps }: INodeDefaultProps,
   ref: React.ForwardedRef<HTMLDivElement>
 ) => {
@@ -77,3 +77,12 @@ export const NodeCustom = (
     </NodeContainer>
   );
 };
+
+const NodeCustomRender: React.ForwardRefRenderFunction<
+  HTMLDivElement,
+  INodeDefaultProps
+> = ({ node, children, ...otherProps }, ref) => {
+  return NodeCustomElement({ node, children, ...otherProps }, ref);
+};
+
+export const NodeCustom = React.forwardRef(NodeCustomRender);

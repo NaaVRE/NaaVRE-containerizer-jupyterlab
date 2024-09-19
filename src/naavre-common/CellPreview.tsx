@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cloneDeep, mapValues } from 'lodash';
 import * as actions from '@mrblenny/react-flow-chart/src/container/actions';
-import { FlowChart, IChart } from '@mrblenny/react-flow-chart';
+import { FlowChart, IChart, INodeDefaultProps } from '@mrblenny/react-flow-chart';
 
 import { NodeCustom } from './NodeCustom';
 import { NodeInnerCustom } from './NodeInnerCustom';
@@ -42,7 +42,7 @@ export class CellPreview extends React.Component {
             chart={chart}
             callbacks={stateActions}
             Components={{
-              Node: NodeCustom,
+              Node: (NodeCustom as React.FunctionComponent<INodeDefaultProps>),
               NodeInner: NodeInnerCustom,
               Port: PortCustom
             }}

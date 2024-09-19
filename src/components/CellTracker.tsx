@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { NaaVREExternalService } from '../naavre-common/mockHandler';
-import { requestAPI } from '../naavre-common/handler';
 import { CellPreview } from '../naavre-common/CellPreview';
 import { VRECell } from '../naavre-common/types';
 import { INotebookModel, Notebook, NotebookPanel } from '@jupyterlab/notebook';
@@ -63,7 +62,11 @@ const DefaultCell: VRECell = {
   chart_obj: emptyChart,
   node_id: '',
   container_source: '',
-  global_conf: {}
+  global_conf: {},
+  base_image: null,
+  image_version: '',
+  kernel: '',
+  notebook_dict: {}
 };
 
 const DefaultState: IState = {
@@ -147,14 +150,6 @@ export class CellTracker extends React.Component<IProps, IState> {
     event: React.ChangeEvent<{ name?: string; value: unknown }>,
     port: string
   ) => {
-    await requestAPI<any>('containerizer/types', {
-      body: JSON.stringify({
-        port: port,
-        type: event.target.value
-      }),
-      method: 'POST'
-    });
-
     const currTypeSelections = this.state.typeSelections;
     currTypeSelections[port] = true;
     const currCurrentCell = this.state.currentCell;
@@ -168,14 +163,13 @@ export class CellTracker extends React.Component<IProps, IState> {
   };
 
   baseImageUpdate = async (value: any) => {
-    console.log('value: ' + value);
-    await requestAPI<any>('containerizer/baseimage', {
-      body: JSON.stringify({
-        image: value
-      }),
-      method: 'POST'
+    const currCurrentCell = this.state.currentCell;
+    console.log("baseImageUpdate", value);
+    currCurrentCell.base_image = value;
+    this.setState({
+      baseImageSelected: true,
+      currentCell: currCurrentCell
     });
-    this.setState({ baseImageSelected: true });
   };
 
   extractor = async (notebookModel: INotebookModel | null, save = false) => {
@@ -184,54 +178,56 @@ export class CellTracker extends React.Component<IProps, IState> {
     }
     await this.loadBaseImages();
     const kernel = await this.getKernel();
-    try {
-      this.setState({
-        loading: true,
-        extractorError: ''
-      });
+    this.setState({
+      loading: true,
+      extractorError: ''
+    });
 
-      const extractedCell = await requestAPI<any>('containerizer/extract', {
-        body: JSON.stringify({
-          save: save,
-          kernel,
-          cell_index: this.state.currentCellIndex,
-          notebook: notebookModel.toJSON()
-        }),
-        method: 'POST'
-      });
-      this.setState({
-        currentCell: extractedCell,
-        loading: false,
-        extractorError: ''
-      });
-      const typeSelections: { [type: string]: boolean } = {};
-
-      this.state.currentCell.inputs.forEach((el: string) => {
-        typeSelections[el] = this.getVarType(el) !== null;
-      });
-
-      this.state.currentCell.outputs.forEach((el: string) => {
-        typeSelections[el] = this.getVarType(el) !== null;
-      });
-
-      this.state.currentCell.params.forEach((el: string) => {
-        typeSelections[el] = this.getVarType(el) !== null;
-      });
-      this.state.currentCell.secrets.forEach((el: string) => {
-        typeSelections[el] = this.getVarType(el) !== null;
-      });
-      this.setState({ typeSelections: typeSelections });
-
-      if (this.cellPreviewRef.current !== null) {
-        this.cellPreviewRef.current.updateChart(extractedCell['chart_obj']);
+    NaaVREExternalService(
+      'POST',
+      `${this.props.settings.containerizerServiceUrl}/extract`,
+      {},
+      {
+        save: save,
+        kernel,
+        cell_index: this.state.currentCellIndex,
+        notebook: notebookModel.toJSON()
       }
-    } catch (error) {
-      console.log(error);
-      this.setState({
-        loading: false,
-        extractorError: String(error)
+    )
+      .then(data => {
+        const extractedCell = (data as VRECell)
+        this.setState({
+          currentCell: extractedCell,
+          loading: false,
+          extractorError: ''
+        });
+
+        const typeSelections: { [type: string]: boolean } = {};
+        this.state.currentCell.inputs.forEach((el: string) => {
+          typeSelections[el] = this.getVarType(el) !== null;
+        });
+        this.state.currentCell.outputs.forEach((el: string) => {
+          typeSelections[el] = this.getVarType(el) !== null;
+        });
+        this.state.currentCell.params.forEach((el: string) => {
+          typeSelections[el] = this.getVarType(el) !== null;
+        });
+        this.state.currentCell.secrets.forEach((el: string) => {
+          typeSelections[el] = this.getVarType(el) !== null;
+        });
+        this.setState({ typeSelections: typeSelections });
+
+        if (this.cellPreviewRef.current !== null) {
+          this.cellPreviewRef.current.updateChart(extractedCell['chart_obj']);
+        }
+      })
+      .catch(reason => {
+        console.log(reason);
+        this.setState({
+          loading: false,
+          extractorError: String(reason)
+        });
       });
-    }
   };
 
   onActiveCellChanged: Slot<Notebook, Cell | null> = async (

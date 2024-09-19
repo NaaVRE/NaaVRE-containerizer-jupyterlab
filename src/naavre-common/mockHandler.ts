@@ -236,6 +236,10 @@ export async function NaaVREExternalService(
     if (method === 'POST') {
       resp = containerizeResponse;
     }
+  } else if (url.endsWith('/NaaVRE-catalogue-service/cells')) {
+    if (method === 'POST') {
+      resp = {};
+    }
   }
 
   console.log('Mocking NaaVREExternalService', {

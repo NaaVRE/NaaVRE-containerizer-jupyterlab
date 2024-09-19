@@ -96,8 +96,9 @@ export class CellTracker extends React.Component<IProps, IState> {
       title: '',
       body: ReactWidget.create(
         <AddCellDialog
-          notebook={this.props.notebook}
+          cell={this.state.currentCell}
           closeDialog={this.closeDialog}
+          settings={this.props.settings}
         />
       ) as Dialog.IBodyWidget<any>,
       buttons: this.state.loading ? [] : [Dialog.okButton({ label: 'Close' })]

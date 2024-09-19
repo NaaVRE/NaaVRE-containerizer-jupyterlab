@@ -5,10 +5,10 @@
   "type": "object",
   "properties": {
     "containerizerServiceUrl": {
-      "type": ["string", "null"],
+      "type": ["string"],
       "title": "Containerizer service URL",
       "description": "URL of the containerizer service (example: https://my-naavre.example.com/NaaVRE-containerizer-service)",
-      "default": null
+      "default": "/NaaVRE-containerizer-service"
     }
   },
   "additionalProperties": false

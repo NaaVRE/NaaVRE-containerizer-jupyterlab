@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { requestAPI, NaaVREExternalService } from '../naavre-common/handler';
+import { NaaVREExternalService } from '../naavre-common/mockHandler';
+import { requestAPI } from '../naavre-common/handler';
 import { CellPreview } from '../naavre-common/CellPreview';
 import { VRECell } from '../naavre-common/types';
 import { INotebookModel, Notebook, NotebookPanel } from '@jupyterlab/notebook';

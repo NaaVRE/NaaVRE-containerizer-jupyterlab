@@ -2,7 +2,7 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '@jupyterlab/services';
 
-interface INaaVREExternalServiceResponse {
+export interface INaaVREExternalServiceResponse {
   status_code: number;
   reason: string;
   header: object;

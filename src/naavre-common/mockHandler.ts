@@ -243,5 +243,6 @@ export async function NaaVREExternalService(
     },
     response: resp
   });
+  await new Promise(r => setTimeout(r, 2000));
   return resp;
 }

@@ -4,47 +4,23 @@ import { CellPreview } from '../naavre-common/CellPreview';
 import { VRECell } from '../naavre-common/types';
 import { INotebookModel, Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { Dialog, ReactWidget, showDialog } from '@jupyterlab/apputils';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Cell } from '@jupyterlab/cells';
-import Table from '@material-ui/core/Table';
 import { theme } from '../Theme';
-import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
-import {
-  Button,
-  FormControl,
-  IconButton,
-  MenuItem,
-  Select,
-  TableBody,
-  TextField,
-  ThemeProvider
-} from '@material-ui/core';
+import { Button, TextField, ThemeProvider } from '@material-ui/core';
 import { Alert, Autocomplete, Box, LinearProgress } from '@mui/material';
-import { IOutputAreaModel } from '@jupyterlab/outputarea';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { AddCellDialog } from './AddCellDialog';
-import CloseIcon from '@material-ui/icons/Close';
 import { emptyChart } from '../naavre-common/emptyChart';
 import { Slot } from '@lumino/signaling';
 import { IVREPanelSettings } from '../VREPanel';
+import { CellIOTable } from './CellIOTable';
+import { CellDependenciesTable } from './CellDependenciesTable';
+import { detectType } from '../services/rTypes';
 
 interface IProps {
   notebook: NotebookPanel | null;
   settings: IVREPanelSettings;
-}
-
-interface IState {
-  loading: boolean;
-  isDialogOpen: boolean;
-  extractorError: string;
-  baseImageSelected: boolean;
-  currentCellIndex: number;
-  currentCell: VRECell;
-  typeSelections: { [type: string]: boolean };
-  baseImages: any[];
 }
 
 const DefaultCell: VRECell = {
@@ -69,18 +45,29 @@ const DefaultCell: VRECell = {
   notebook_dict: {}
 };
 
+interface IState {
+  baseImageSelected: boolean;
+  baseImages: any[];
+  cellAnalyzed: boolean;
+  currentCell: VRECell;
+  currentCellIndex: number;
+  extractorError: string;
+  isDialogOpen: boolean;
+  loading: boolean;
+  typeSelections: { [type: string]: boolean };
+}
+
 const DefaultState: IState = {
+  baseImageSelected: false,
+  baseImages: [],
+  cellAnalyzed: false,
+  currentCell: DefaultCell,
+  currentCellIndex: -1,
+  extractorError: '',
   isDialogOpen: false,
   loading: false,
-  extractorError: '',
-  baseImageSelected: false,
-  currentCellIndex: -1,
-  currentCell: DefaultCell,
-  typeSelections: {},
-  baseImages: []
+  typeSelections: {}
 };
-
-type SaveState = 'started' | 'completed' | 'failed';
 
 export class CellTracker extends React.Component<IProps, IState> {
   state = DefaultState;
@@ -91,53 +78,16 @@ export class CellTracker extends React.Component<IProps, IState> {
     this.cellPreviewRef = React.createRef();
   }
 
-  handleCreateCell = async () => {
-    const AddCellDialogOptions: Partial<Dialog.IOptions<any>> = {
-      title: '',
-      body: ReactWidget.create(
-        <AddCellDialog
-          cell={this.state.currentCell}
-          closeDialog={this.closeDialog}
-          settings={this.props.settings}
-        />
-      ) as Dialog.IBodyWidget<any>,
-      buttons: this.state.loading ? [] : [Dialog.okButton({ label: 'Close' })]
-    };
-    showDialog(AddCellDialogOptions).then(() => {
-      this.setState({ loading: false });
-    });
-  };
-
-  closeDialog = () => {
-    this.setState({ isDialogOpen: false });
-  };
-
-  allTypesSelected = () => {
-    if (Object.values(this.state.typeSelections).length > 0) {
-      return Object.values(this.state.typeSelections).reduce((prev, curr) => {
-        return prev && curr;
-      });
-    }
-    return false;
-  };
-
-  getVarType(var_name: string): string | null {
-    if (
-      this.state.currentCell !== null &&
-      var_name in this.state.currentCell.types
-    ) {
-      return this.state.currentCell.types[var_name];
-    } else {
-      return null;
-    }
-  }
-
-  async loadBaseImages() {
-    NaaVREExternalService('GET', `${this.props.settings.containerizerServiceUrl}/base-image-tags`)
+  loadBaseImages = async () => {
+    NaaVREExternalService(
+      'GET',
+      `${this.props.settings.containerizerServiceUrl}/base-image-tags`
+    )
       .then(data => {
-        const updatedBaseImages = Object.entries(data).map(
-          ([name, image]) => ({ name, image })
-        );
+        const updatedBaseImages = Object.entries(data).map(([name, image]) => ({
+          name,
+          image
+        }));
         console.log('updatedBaseImages');
         console.log(updatedBaseImages);
         this.setState({ baseImages: updatedBaseImages });
@@ -145,107 +95,23 @@ export class CellTracker extends React.Component<IProps, IState> {
       .catch(reason => {
         console.log(reason);
       });
-  }
-
-  typesUpdate = async (
-    event: React.ChangeEvent<{ name?: string; value: unknown }>,
-    port: string
-  ) => {
-    const currTypeSelections = this.state.typeSelections;
-    currTypeSelections[port] = true;
-    const currCurrentCell = this.state.currentCell;
-    currCurrentCell.types[port] = event.target.value
-      ? String(event.target.value)
-      : null;
-    this.setState({
-      typeSelections: currTypeSelections,
-      currentCell: currCurrentCell
-    });
   };
 
-  baseImageUpdate = async (value: any) => {
-    const currCurrentCell = this.state.currentCell;
-    console.log("baseImageUpdate", value);
-    currCurrentCell.base_image = value;
-    this.setState({
-      baseImageSelected: true,
-      currentCell: currCurrentCell
-    });
-  };
-
-  extractor = async (notebookModel: INotebookModel | null, save = false) => {
-    if (notebookModel === null) {
-      return null;
+  resetState = () => {
+    const newState = DefaultState;
+    newState.baseImages = this.state.baseImages;
+    this.setState(newState);
+    if (this.cellPreviewRef.current !== null) {
+      this.cellPreviewRef.current.updateChart(emptyChart);
     }
-    await this.loadBaseImages();
-    const kernel = await this.getKernel();
-    this.setState({
-      loading: true,
-      extractorError: ''
-    });
-
-    NaaVREExternalService(
-      'POST',
-      `${this.props.settings.containerizerServiceUrl}/extract`,
-      {},
-      {
-        save: save,
-        kernel,
-        cell_index: this.state.currentCellIndex,
-        notebook: notebookModel.toJSON()
-      }
-    )
-      .then(data => {
-        const extractedCell = (data as VRECell)
-        this.setState({
-          currentCell: extractedCell,
-          loading: false,
-          extractorError: ''
-        });
-
-        const typeSelections: { [type: string]: boolean } = {};
-        this.state.currentCell.inputs.forEach((el: string) => {
-          typeSelections[el] = this.getVarType(el) !== null;
-        });
-        this.state.currentCell.outputs.forEach((el: string) => {
-          typeSelections[el] = this.getVarType(el) !== null;
-        });
-        this.state.currentCell.params.forEach((el: string) => {
-          typeSelections[el] = this.getVarType(el) !== null;
-        });
-        this.state.currentCell.secrets.forEach((el: string) => {
-          typeSelections[el] = this.getVarType(el) !== null;
-        });
-        this.setState({ typeSelections: typeSelections });
-
-        if (this.cellPreviewRef.current !== null) {
-          this.cellPreviewRef.current.updateChart(extractedCell['chart_obj']);
-        }
-      })
-      .catch(reason => {
-        console.log(reason);
-        this.setState({
-          loading: false,
-          extractorError: String(reason)
-        });
-      });
   };
 
   onActiveCellChanged: Slot<Notebook, Cell | null> = async (
     notebook,
     _activeCell
   ) => {
+    this.resetState();
     this.setState({ currentCellIndex: notebook.activeCellIndex });
-    return this.extractor(this.props.notebook!.model);
-  };
-
-  handleSaveState = async (
-    _context: DocumentRegistry.Context,
-    state: SaveState
-  ) => {
-    if (state === 'completed') {
-      return this.extractor(this.props.notebook!.model);
-    }
   };
 
   connectAndInitWhenReady = (notebook: NotebookPanel) => {
@@ -254,17 +120,16 @@ export class CellTracker extends React.Component<IProps, IState> {
         this.props.notebook.content.activeCellChanged.connect(
           this.onActiveCellChanged
         );
-        this.props.notebook.context.saveState.connect(this.handleSaveState);
-        this.setState({ currentCellIndex: notebook.content.activeCellIndex });
       }
     });
   };
 
-  async componentDidMount() {
+  componentDidMount = async () => {
+    await this.loadBaseImages();
     if (this.props.notebook) {
       this.connectAndInitWhenReady(this.props.notebook);
     }
-  }
+  };
 
   componentDidUpdate = async (
     prevProps: Readonly<IProps>,
@@ -285,197 +150,109 @@ export class CellTracker extends React.Component<IProps, IState> {
     }
   };
 
-  async getKernel() {
+  getKernel = async () => {
     const sessionContext = this.props.notebook!.context.sessionContext;
     const kernelObject = sessionContext?.session?.kernel; // https://jupyterlab.readthedocs.io/en/stable/api/interfaces/services.kernel.ikernelconnection-1.html#serversettings
     return (await kernelObject!.info).implementation;
-  }
+  };
 
-  typeDetection = async () => {
-    this.setState({ loading: true });
-    const panel = this.props.notebook;
-
-    try {
-      // Get contents of currently selected cell
-      const currentCell = panel!.content.activeCell;
-      if (!currentCell) {
-        console.log('No cell selected');
-        return;
-      } else if (currentCell.model.type !== 'code') {
-        console.log('Selected cell is not a code cell');
-        return;
-      }
-
-      // Clear output of currently selected cell
-      const cell = panel!.content.activeCell;
-      const codeCell = cell as Cell & { model: { outputs: IOutputAreaModel } };
-      codeCell.model.outputs.clear();
-
-      // Get kernel
-      const kernel = panel!.sessionContext.session?.kernel;
-      if (!kernel) {
-        console.log('No kernel found');
-        return;
-      }
-
-      // Get original source code
-      // const cellContent = currentCell.model.value.text; // FIXME
-      const cellContent = 'xyz';
-
-      // Retrieve inputs, outputs, and params from extractedCell
-      const extractedCell = this.state.currentCell;
-      const types = extractedCell['types'];
-      const inputs = extractedCell['inputs'];
-      const outputs = extractedCell['outputs'];
-      const params = extractedCell['params'];
-
-      // Function to send code to kernel and handle response
-      const sendCodeToKernel = async (
-        code: string,
-        vars: string[]
-      ): Promise<{ [key: string]: string }> => {
-        const future = kernel.requestExecute({ code });
-        const detectedTypes: { [key: string]: string } = {};
-
-        return new Promise((resolve, reject) => {
-          future.onIOPub = msg => {
-            if (msg.header.msg_type === 'execute_result') {
-              console.log('Execution Result:', msg.content);
-            } else if (msg.header.msg_type === 'display_data') {
-              console.log('Display Data:', msg.content);
-
-              let typeString = (
-                'data' in msg.content
-                  ? msg.content.data['text/html']
-                  : 'No data found'
-              ) as string;
-              typeString = typeString.replace(/['"]/g, '');
-              const varName = vars[0];
-
-              let detectedType = null;
-              if (typeString === 'integer') {
-                detectedType = 'int';
-              } else if (typeString === 'character') {
-                detectedType = 'str';
-              } else if (typeString === 'double') {
-                detectedType = 'float';
-              } else if (typeString === 'list') {
-                detectedType = 'list';
-              } else {
-                detectedType = types[varName];
-              }
-
-              if (detectedType !== null) {
-                detectedTypes[varName] = detectedType;
-              }
-
-              const output = {
-                output_type: 'display_data',
-                data: {
-                  'text/plain':
-                    vars[0] +
-                    ': ' +
-                    ('data' in msg.content
-                      ? msg.content.data['text/html']
-                      : 'No data found')
-                },
-                metadata: {}
-              };
-
-              codeCell.model.outputs.add(output);
-              vars.shift();
-            } else if (msg.header.msg_type === 'stream') {
-              console.log('Stream:', msg);
-            } else if (msg.header.msg_type === 'error') {
-              const output = {
-                output_type: 'display_data',
-                data: {
-                  'text/plain':
-                    'evalue' in msg.content
-                      ? msg.content.evalue
-                      : 'No data found'
-                },
-                metadata: {}
-              };
-              codeCell.model.outputs.add(output);
-              console.error('Error:', msg.content);
-            }
-          };
-
-          future.onReply = msg => {
-            if ((msg.content.status as string) === 'ok') {
-              resolve(detectedTypes);
-            } else if ((msg.content.status as string) === 'error') {
-              reject(msg.content);
-            }
-          };
-        });
-      };
-
-      // Create code with typeof() for inputs and params
-      let inputParamSource = '';
-      inputs.forEach(input => {
-        inputParamSource += `\ntypeof(${input})`;
-      });
-      params.forEach(param => {
-        inputParamSource += `\ntypeof(${param})`;
-      });
-
-      // Send code to check types of inputs and params
-      const detectedInputParamTypes = await sendCodeToKernel(inputParamSource, [
-        ...inputs,
-        ...params
-      ]);
-      console.log('Detected Input and Param Types:', detectedInputParamTypes);
-
-      // Send original source code
-      await kernel.requestExecute({ code: cellContent }).done;
-
-      // Create code with typeof() for outputs
-      let outputSource = '';
-      outputs.forEach(output => {
-        outputSource += `\ntypeof(${output})`;
-      });
-
-      // Send code to check types of outputs
-      const detectedOutputTypes = await sendCodeToKernel(outputSource, [
-        ...outputs
-      ]);
-      console.log('Detected Output Types:', detectedOutputTypes);
-
-      // Update the state with the detected types
-      const newTypes = {
-        ...this.state.currentCell.types,
-        ...detectedInputParamTypes,
-        ...detectedOutputTypes
-      };
-      const updatedCell = { ...this.state.currentCell, types: newTypes };
-
-      const typeSelections: { [key: string]: boolean } = {};
-
-      updatedCell.inputs.forEach(el => {
-        typeSelections[el] = newTypes[el] !== null;
-      });
-
-      updatedCell.outputs.forEach(el => {
-        typeSelections[el] = newTypes[el] !== null;
-      });
-
-      updatedCell.params.forEach(el => {
-        typeSelections[el] = newTypes[el] !== null;
-      });
-
-      this.setState({
-        currentCell: updatedCell,
-        typeSelections: typeSelections
-      });
-
-      console.log(this.state);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      this.setState({ loading: false });
+  getVarType = (var_name: string): string | null => {
+    if (
+      this.state.currentCell !== null &&
+      var_name in this.state.currentCell.types
+    ) {
+      return this.state.currentCell.types[var_name];
+    } else {
+      return null;
     }
+  };
+
+  extractCell = async (notebookModel: INotebookModel | null, save = false) => {
+    if (notebookModel === null) {
+      return null;
+    }
+    const kernel = await this.getKernel();
+    this.setState({
+      loading: true,
+      extractorError: ''
+    });
+
+    NaaVREExternalService(
+      'POST',
+      `${this.props.settings.containerizerServiceUrl}/extract`,
+      {},
+      {
+        save: save,
+        kernel,
+        cell_index: this.state.currentCellIndex,
+        notebook: notebookModel.toJSON()
+      }
+    )
+      .then(data => {
+        const extractedCell = data as VRECell;
+        this.setState({ currentCell: extractedCell });
+
+        const typeSelections: { [type: string]: boolean } = {};
+        extractedCell.inputs.forEach((el: string) => {
+          typeSelections[el] = this.getVarType(el) !== null;
+        });
+        extractedCell.outputs.forEach((el: string) => {
+          typeSelections[el] = this.getVarType(el) !== null;
+        });
+        extractedCell.params.forEach((el: string) => {
+          typeSelections[el] = this.getVarType(el) !== null;
+        });
+        extractedCell.secrets.forEach((el: string) => {
+          typeSelections[el] = this.getVarType(el) !== null;
+        });
+
+        this.setState({
+          cellAnalyzed: true,
+          extractorError: '',
+          loading: false,
+          typeSelections: typeSelections
+        });
+
+        if (this.cellPreviewRef.current !== null) {
+          this.cellPreviewRef.current.updateChart(extractedCell['chart_obj']);
+        }
+      })
+      .catch(reason => {
+        console.log(reason);
+        this.setState({
+          loading: false,
+          extractorError: String(reason)
+        });
+      });
+  };
+
+  onAnalyzeCell = () => {
+    this.extractCell(this.props.notebook!.model)
+      .then(() => {})
+      .catch(reason => {
+        console.log('Error extracting cell', reason);
+      });
+  };
+
+  onDetectType = async () => {
+    this.setState({ loading: true });
+    detectType({
+      notebook: this.props.notebook,
+      currentCell: this.state.currentCell
+    })
+      .then(res => {
+        this.setState({
+          currentCell: res.updatedCell,
+          typeSelections: res.updatedTypeSelections
+        });
+        console.log(this.state);
+      })
+      .catch(error => {
+        console.log(error);
+      })
+      .finally(() => {
+        this.setState({ loading: false });
+      });
   };
 
   removeInput = (input: string) => {
@@ -529,292 +306,116 @@ export class CellTracker extends React.Component<IProps, IState> {
     });
   };
 
+  removeSecret = (secret: string) => {
+    const updatedSecrets = this.state.currentCell.secrets.filter(
+      (p: string) => p !== secret
+    );
+    const updatedCell = {
+      ...this.state.currentCell,
+      secrets: updatedSecrets
+    } as VRECell;
+
+    const updatedTypeSelections = this.state.typeSelections;
+    delete updatedTypeSelections[secret];
+    this.setState({
+      currentCell: updatedCell,
+      typeSelections: updatedTypeSelections
+    });
+  };
+
+  updateType = async (
+    event: React.ChangeEvent<{ name?: string; value: unknown }>,
+    port: string
+  ) => {
+    const currTypeSelections = this.state.typeSelections;
+    currTypeSelections[port] = true;
+    const currCurrentCell = this.state.currentCell;
+    currCurrentCell.types[port] = event.target.value
+      ? String(event.target.value)
+      : null;
+    this.setState({
+      typeSelections: currTypeSelections,
+      currentCell: currCurrentCell
+    });
+  };
+
+  updateBaseImage = async (value: any) => {
+    const currCurrentCell = this.state.currentCell;
+    console.log('updateBaseImage', value);
+    currCurrentCell.base_image = value;
+    this.setState({
+      baseImageSelected: true,
+      currentCell: currCurrentCell
+    });
+  };
+
+  allTypesSelected = () => {
+    if (Object.values(this.state.typeSelections).length > 0) {
+      return Object.values(this.state.typeSelections).reduce((prev, curr) => {
+        return prev && curr;
+      });
+    }
+    return false;
+  };
+
+  onContainerize = async () => {
+    const AddCellDialogOptions: Partial<Dialog.IOptions<any>> = {
+      title: '',
+      body: ReactWidget.create(
+        <AddCellDialog
+          cell={this.state.currentCell}
+          closeDialog={() => this.setState({ isDialogOpen: false })}
+          settings={this.props.settings}
+        />
+      ) as Dialog.IBodyWidget<any>,
+      buttons: this.state.loading ? [] : [Dialog.okButton({ label: 'Close' })]
+    };
+    showDialog(AddCellDialogOptions).then(() => {
+      this.setState({ loading: false });
+    });
+  };
+
   render() {
     return (
       <ThemeProvider theme={theme}>
         <div>
-          <div className={'lw-panel-editor'}>
-            <CellPreview ref={this.cellPreviewRef} />
-          </div>
+          <CellPreview ref={this.cellPreviewRef} />
+          <Button
+            variant="contained"
+            className={'lw-panel-button'}
+            onClick={this.onAnalyzeCell}
+            color="primary"
+            disabled={!this.state.currentCell || this.state.loading}
+          >
+            {this.state.loading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Analyze cell'
+            )}
+          </Button>
+          {this.state.currentCell.kernel === 'IRKernel' && (
+            <Button
+              variant="contained"
+              className={'lw-panel-button'}
+              onClick={this.onDetectType}
+              color="primary"
+              disabled={
+                !this.state.currentCell ||
+                this.state.loading ||
+                this.allTypesSelected()
+              }
+            >
+              Detect types
+            </Button>
+          )}
           {this.state.extractorError && (
             <div>
-              <Alert severity="error" className={'lw-panel-preview'}>
+              <Alert severity="error">
                 <p>Notebook cannot be analyzed: {this.state.extractorError}</p>
               </Alert>
             </div>
           )}
-          {this.state.currentCell !== null && !this.state.loading ? (
-            <div>
-              {this.state.currentCell.inputs.length > 0 ? (
-                <div>
-                  <p className={'lw-panel-preview'}>Inputs</p>
-                  <TableContainer
-                    component={Paper}
-                    className={'lw-panel-table'}
-                  >
-                    <Table aria-label="simple table">
-                      <TableBody>
-                        {this.state.currentCell.inputs.map((input: string) => (
-                          <TableRow
-                            key={this.state.currentCell.node_id + '-' + input}
-                          >
-                            <TableCell component="th" scope="row">
-                              <p style={{ fontSize: '1em' }}>{input}</p>
-                            </TableCell>
-                            <TableCell component="th" scope="row">
-                              <FormControl fullWidth>
-                                <Select
-                                  labelId="io-types-select-label"
-                                  id={
-                                    this.state.currentCell.node_id +
-                                    '-' +
-                                    input +
-                                    '-select'
-                                  }
-                                  label="Type"
-                                  value={this.getVarType(input)}
-                                  error={this.getVarType(input) === null}
-                                  onChange={event => {
-                                    this.typesUpdate(event, input);
-                                  }}
-                                >
-                                  <MenuItem value={'int'}>Integer</MenuItem>
-                                  <MenuItem value={'float'}>Float</MenuItem>
-                                  <MenuItem value={'str'}>String</MenuItem>
-                                  <MenuItem value={'list'}>List</MenuItem>
-                                </Select>
-                              </FormControl>
-                            </TableCell>
-                            <TableCell component="th" scope="row">
-                              <IconButton
-                                aria-label="delete"
-                                onClick={() => this.removeInput(input)}
-                              >
-                                <CloseIcon />
-                              </IconButton>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </div>
-              ) : (
-                <div></div>
-              )}
-              {this.state.currentCell.outputs.length > 0 ? (
-                <div>
-                  <p className={'lw-panel-preview'}>Outputs</p>
-                  <TableContainer
-                    component={Paper}
-                    className={'lw-panel-table'}
-                  >
-                    <Table aria-label="simple table">
-                      <TableBody>
-                        {this.state.currentCell.outputs.map(
-                          (output: string) => (
-                            <TableRow
-                              key={
-                                this.state.currentCell.node_id + '-' + output
-                              }
-                            >
-                              <TableCell component="th" scope="row">
-                                <p style={{ fontSize: '1em' }}>{output}</p>
-                              </TableCell>
-                              <TableCell component="th" scope="row">
-                                <FormControl fullWidth>
-                                  <Select
-                                    labelId="io-types-select-label"
-                                    id={
-                                      this.state.currentCell.node_id +
-                                      '-' +
-                                      output +
-                                      '-select'
-                                    }
-                                    label="Type"
-                                    value={this.getVarType(output)}
-                                    error={this.getVarType(output) === null}
-                                    onChange={event => {
-                                      this.typesUpdate(event, output);
-                                    }}
-                                  >
-                                    <MenuItem value={'int'}>Integer</MenuItem>
-                                    <MenuItem value={'float'}>Float</MenuItem>
-                                    <MenuItem value={'str'}>String</MenuItem>
-                                    <MenuItem value={'list'}>List</MenuItem>
-                                  </Select>
-                                </FormControl>
-                              </TableCell>
-
-                              <TableCell component="th" scope="row">
-                                <IconButton
-                                  aria-label="delete"
-                                  onClick={() => this.removeOutput(output)}
-                                >
-                                  <CloseIcon />
-                                </IconButton>
-                              </TableCell>
-                            </TableRow>
-                          )
-                        )}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </div>
-              ) : (
-                <div></div>
-              )}
-              {this.state.currentCell.params.length > 0 ? (
-                <div>
-                  <p className={'lw-panel-preview'}>Parameters</p>
-                  <TableContainer
-                    component={Paper}
-                    className={'lw-panel-table'}
-                  >
-                    <Table aria-label="simple table">
-                      <TableBody>
-                        {this.state.currentCell.params.map((param: string) => (
-                          <TableRow
-                            key={this.state.currentCell.node_id + '-' + param}
-                          >
-                            <TableCell component="th" scope="row">
-                              <p style={{ fontSize: '1em' }}>{param}</p>
-                            </TableCell>
-                            <TableCell component="th" scope="row">
-                              <FormControl fullWidth>
-                                <Select
-                                  labelId="param-types-select-label"
-                                  id={
-                                    this.state.currentCell.node_id +
-                                    '-' +
-                                    param +
-                                    '-select'
-                                  }
-                                  label="Type"
-                                  value={this.getVarType(param)}
-                                  error={this.getVarType(param) === null}
-                                  onChange={event => {
-                                    this.typesUpdate(event, param);
-                                  }}
-                                >
-                                  <MenuItem value={'int'}>Integer</MenuItem>
-                                  <MenuItem value={'float'}>Float</MenuItem>
-                                  <MenuItem value={'str'}>String</MenuItem>
-                                  <MenuItem value={'list'}>List</MenuItem>
-                                </Select>
-                              </FormControl>
-                            </TableCell>
-                            <TableCell component="th" scope="row">
-                              <IconButton
-                                aria-label="delete"
-                                onClick={() => this.removeParam(param)}
-                              >
-                                <CloseIcon />
-                              </IconButton>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </div>
-              ) : (
-                <div></div>
-              )}
-              {this.state.currentCell.secrets.length > 0 ? (
-                <div>
-                  <p className={'lw-panel-preview'}>Secrets</p>
-                  <TableContainer
-                    component={Paper}
-                    className={'lw-panel-table'}
-                  >
-                    <Table aria-label="simple table">
-                      <TableBody>
-                        {this.state.currentCell.secrets.map(
-                          (secret: string) => (
-                            <TableRow
-                              key={
-                                this.state.currentCell.node_id + '-' + secret
-                              }
-                            >
-                              <TableCell component="th" scope="row">
-                                {secret}
-                              </TableCell>
-                              <TableCell component="th" scope="row">
-                                <FormControl fullWidth>
-                                  <Select
-                                    labelId="secret-types-select-label"
-                                    id={
-                                      this.state.currentCell.node_id +
-                                      '-' +
-                                      secret +
-                                      '-select'
-                                    }
-                                    label="Type"
-                                    value={this.getVarType(secret)}
-                                    error={this.getVarType(secret) === null}
-                                    onChange={event => {
-                                      this.typesUpdate(event, secret);
-                                    }}
-                                  >
-                                    <MenuItem value={'int'}>Integer</MenuItem>
-                                    <MenuItem value={'float'}>Float</MenuItem>
-                                    <MenuItem value={'str'}>String</MenuItem>
-                                    <MenuItem value={'list'}>List</MenuItem>
-                                  </Select>
-                                </FormControl>
-                              </TableCell>
-                            </TableRow>
-                          )
-                        )}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </div>
-              ) : (
-                <div></div>
-              )}
-              {this.state.currentCell.dependencies.length > 0 ? (
-                <div>
-                  <p className={'lw-panel-preview'}>Dependencies</p>
-                  <TableContainer
-                    component={Paper}
-                    className={'lw-panel-table'}
-                  >
-                    <Table aria-label="simple table">
-                      <TableBody>
-                        {this.state.currentCell.dependencies.map((dep: any) => (
-                          <TableRow>
-                            <TableCell component="th" scope="row">
-                              {dep['module'] !== ''
-                                ? dep['module'] + ' • ' + dep['name']
-                                : dep['name']}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </div>
-              ) : (
-                <div></div>
-              )}
-              <div>
-                <p className={'lw-panel-preview'}>Base Image</p>
-                <Autocomplete
-                  getOptionLabel={option => option.name}
-                  options={this.state.baseImages}
-                  disablePortal
-                  onChange={(_event: any, newValue: any | null) => {
-                    this.baseImageUpdate(newValue.image);
-                  }}
-                  id="combo-box-demo"
-                  sx={{ width: 330, margin: '20px' }}
-                  renderInput={params => <TextField {...params} />}
-                />
-              </div>
-            </div>
-          ) : (
+          {this.state.loading ? (
             <div>
               {this.state.loading ? (
                 <div>
@@ -833,37 +434,84 @@ export class CellTracker extends React.Component<IProps, IState> {
                 <TableContainer></TableContainer>
               )}
             </div>
-          )}
-          <div>
-            <Button
-              variant="contained"
-              className={'lw-panel-button'}
-              onClick={this.handleCreateCell}
-              color="primary"
-              disabled={
-                !this.allTypesSelected() ||
-                !this.state.baseImageSelected ||
-                this.state.loading
-              }
-            >
-              Create
-            </Button>
-          </div>
-          <div>
-            <Button
-              variant="contained"
-              className={'lw-panel-button'}
-              onClick={this.typeDetection}
-              color="primary"
-              disabled={!this.state.currentCell || this.state.loading}
-            >
-              {this.state.loading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                'Type Detector'
+          ) : (
+            <div>
+              {this.state.currentCell.inputs.length > 0 && (
+                <CellIOTable
+                  title={'Inputs'}
+                  ioItems={this.state.currentCell.inputs}
+                  nodeId={this.state.currentCell.node_id}
+                  getType={v => this.getVarType(v)}
+                  updateType={this.updateType}
+                  removeEntry={this.removeInput}
+                ></CellIOTable>
               )}
-            </Button>
-          </div>
+              {this.state.currentCell.outputs.length > 0 && (
+                <CellIOTable
+                  title={'Outputs'}
+                  ioItems={this.state.currentCell.outputs}
+                  nodeId={this.state.currentCell.node_id}
+                  getType={v => this.getVarType(v)}
+                  updateType={this.updateType}
+                  removeEntry={this.removeOutput}
+                ></CellIOTable>
+              )}
+              {this.state.currentCell.params.length > 0 && (
+                <CellIOTable
+                  title={'Parameters'}
+                  ioItems={this.state.currentCell.params}
+                  nodeId={this.state.currentCell.node_id}
+                  getType={v => this.getVarType(v)}
+                  updateType={this.updateType}
+                  removeEntry={this.removeParam}
+                ></CellIOTable>
+              )}
+              {this.state.currentCell.secrets.length > 0 && (
+                <CellIOTable
+                  title={'Secrets'}
+                  ioItems={this.state.currentCell.secrets}
+                  nodeId={this.state.currentCell.node_id}
+                  getType={v => this.getVarType(v)}
+                  updateType={this.updateType}
+                  removeEntry={this.removeSecret}
+                ></CellIOTable>
+              )}
+              {this.state.currentCell.dependencies.length > 0 && (
+                <CellDependenciesTable
+                  items={this.state.currentCell.dependencies}
+                ></CellDependenciesTable>
+              )}
+              {this.state.cellAnalyzed && (
+                <div>
+                  <p className={'lw-panel-preview'}>Base Image</p>
+                  <Autocomplete
+                    getOptionLabel={option => option.name}
+                    options={this.state.baseImages}
+                    disablePortal
+                    onChange={(_event: any, newValue: any | null) => {
+                      this.updateBaseImage(newValue.image);
+                    }}
+                    id="combo-box-demo"
+                    sx={{ width: 330, margin: '20px' }}
+                    renderInput={params => <TextField {...params} />}
+                  />
+                  <Button
+                    variant="contained"
+                    className={'lw-panel-button'}
+                    onClick={this.onContainerize}
+                    color="primary"
+                    disabled={
+                      !this.allTypesSelected() ||
+                      !this.state.baseImageSelected ||
+                      this.state.loading
+                    }
+                  >
+                    Containerize
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </ThemeProvider>
     );

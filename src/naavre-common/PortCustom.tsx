@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { IPortDefaultProps } from '@mrblenny/react-flow-chart';
+import { Tooltip } from '@material-ui/core';
 import * as React from 'react';
 
 const PortContainerLeft = styled.div`
@@ -12,10 +13,10 @@ const PortContainerRight = styled.div`
   justify-content: flex-end;
 `;
 
-const PortDot = styled.div<{ $color?: string }>`
+const PortDot = styled.div`
   width: 20px;
   height: 20px;
-  background: ${props => props.$color};
+  background: ${props => props.color};
   border-radius: 50%;
   cursor: pointer;
 `;
@@ -52,23 +53,27 @@ export const PortCustom = (props: IPortDefaultProps) => {
 
   if (props.port.type === 'left') {
     return (
-      <PortContainerLeft>
-        <PortDot color={props.port.properties.color} />
-        <PortLabelContainerLeft>
-          <PortLabel>{props.port.id}</PortLabel>
-        </PortLabelContainerLeft>
-      </PortContainerLeft>
+      <Tooltip title={props.port.id} placement="right">
+        <PortContainerLeft>
+          <PortDot color={props.port.properties.color} />
+          <PortLabelContainerLeft>
+            <PortLabel>{props.port.id}</PortLabel>
+          </PortLabelContainerLeft>
+        </PortContainerLeft>
+      </Tooltip>
     );
   }
 
   if (props.port.type === 'right') {
     return (
-      <PortContainerRight>
-        <PortLabelContainerRight>
-          <PortLabel>{props.port.id}</PortLabel>
-        </PortLabelContainerRight>
-        <PortDot color={props.port.properties.color} />
-      </PortContainerRight>
+      <Tooltip title={props.port.id} placement="left">
+        <PortContainerRight>
+          <PortLabelContainerRight>
+            <PortLabel>{props.port.id}</PortLabel>
+          </PortLabelContainerRight>
+          <PortDot color={props.port.properties.color} />
+        </PortContainerRight>
+      </Tooltip>
     );
   }
 

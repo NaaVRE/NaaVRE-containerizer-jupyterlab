@@ -8,7 +8,7 @@ file_extension: ''
 has_binder: false
 has_settings: true
 kind: frontend
-labextension_name: NaaVRE-containerizer-jupyterlab
+labextension_name: '@naavre/containerizer-jupyterlab'
 mimetype: ''
 mimetype_name: ''
 project_short_description: NaaVRE cells containerizer frontend on Jupyter Lab

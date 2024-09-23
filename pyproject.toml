@@ -37,8 +37,8 @@ artifacts = ["NaaVRE_containerizer_jupyterlab/labextension"]
 exclude = [".github", "binder"]
 
 [tool.hatch.build.targets.wheel.shared-data]
-"NaaVRE_containerizer_jupyterlab/labextension" = "share/jupyter/labextensions/NaaVRE-containerizer-jupyterlab"
-"install.json" = "share/jupyter/labextensions/NaaVRE-containerizer-jupyterlab/install.json"
+"NaaVRE_containerizer_jupyterlab/labextension" = "share/jupyter/labextensions/@naavre/containerizer-jupyterlab"
+"install.json" = "share/jupyter/labextensions/@naavre/containerizer-jupyterlab/install.json"
 
 [tool.hatch.build.hooks.version]
 path = "NaaVRE_containerizer_jupyterlab/_version.py"

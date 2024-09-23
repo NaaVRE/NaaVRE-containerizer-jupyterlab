@@ -1,7 +1,7 @@
 {
   "jupyter.lab.shortcuts": [],
-  "title": "NaaVRE-containerizer-jupyterlab",
-  "description": "NaaVRE-containerizer-jupyterlab settings.",
+  "title": "@naavre/containerizer-jupyterlab",
+  "description": "@naavre/containerizer-jupyterlab settings.",
   "type": "object",
   "properties": {
     "containerizerServiceUrl": {

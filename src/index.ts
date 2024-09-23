@@ -11,10 +11,10 @@ import { IVREPanelSettings } from './VREPanel';
 import { extensionIcon } from './icons';
 
 /**
- * Initialization data for the NaaVRE-containerizer-jupyterlab extension.
+ * Initialization data for the @naavre/containerizer-jupyterlab extension.
  */
 const plugin: JupyterFrontEndPlugin<void> = {
-  id: 'NaaVRE-containerizer-jupyterlab:plugin',
+  id: '@naavre/containerizer-jupyterlab:plugin',
   description: 'NaaVRE cells containerizer frontend on Jupyter Lab',
   autoStart: true,
   requires: [ILayoutRestorer, INotebookTracker],
@@ -26,7 +26,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null
   ) => {
     console.log(
-      'JupyterLab extension NaaVRE-containerizer-jupyterlab is activated!'
+      'JupyterLab extension @naavre/containerizer-jupyterlab is activated!'
     );
 
     let widget: VREPanelWidget;
@@ -48,7 +48,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         })
         .catch(reason => {
           console.error(
-            'Failed to load settings for NaaVRE-containerizer-jupyterlab.',
+            'Failed to load settings for @naavre/containerizer-jupyterlab.',
             reason
           );
         });

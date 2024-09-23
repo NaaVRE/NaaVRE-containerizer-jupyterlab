@@ -19,7 +19,7 @@ test('should emit an activation console message', async ({ page }) => {
     logs.filter(
       s =>
         s ===
-        'JupyterLab extension NaaVRE-containerizer-jupyterlab is activated!'
+        'JupyterLab extension @naavre/containerizer-jupyterlab is activated!'
     )
   ).toHaveLength(1);
 });

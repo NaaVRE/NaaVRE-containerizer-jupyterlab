@@ -1,7 +1,7 @@
 {
-  "name": "NaaVRE-containerizer-jupyterlab-ui-tests",
+  "name": "@naavre/containerizer-jupyterlab-ui-tests",
   "version": "1.0.0",
-  "description": "JupyterLab NaaVRE-containerizer-jupyterlab Integration Tests",
+  "description": "JupyterLab @naavre/containerizer-jupyterlab Integration Tests",
   "private": true,
   "scripts": {
     "start": "jupyter lab --config jupyter_server_test_config.py",

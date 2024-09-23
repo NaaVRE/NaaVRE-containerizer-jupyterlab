@@ -5,107 +5,105 @@
 */
 
 .lifewatch-widget {
-    flex-direction: column;
-    min-width: var(--jp-sidebar-min-width);
-    color: var(--jp-ui-font-color1);
-    background: var(--jp-layout-color1);
-    font-size: var(--jp-ui-font-size1);
-    overflow: auto;
-    height: 100%;
-    display: -webkit-box; /* OLD - iOS 6-, Safari 3.1-6 */
-    display: -moz-box; /* OLD - Firefox 19- (buggy but mostly works) */
-    display: -ms-flexbox; /* TWEENER - IE 10 */
-    display: -webkit-flex; /* NEW - Chrome */
-    display: flex;
+  flex-direction: column;
+  min-width: var(--jp-sidebar-min-width);
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
+  overflow: auto;
+  height: 100%;
+  display: -webkit-box; /* OLD - iOS 6-, Safari 3.1-6 */
+  display: -moz-box; /* OLD - Firefox 19- (buggy but mostly works) */
+  display: -webkit-flex; /* NEW - Chrome */
+  display: flex;
 }
 
 .lifewatch-widget-content {
-    min-width: var(--jp-sidebar-min-width);
-    /* height: calc(100% - 42px); */
-    overflow: auto;
-    /* border-bottom: 1px solid var(--jp-border-color2); */
+  min-width: var(--jp-sidebar-min-width);
+  overflow: auto;
 }
 
 .lw-panel-header {
-    font-size: var(--jp-ui-font-size3);
-    padding: 10px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
+  font-size: var(--jp-ui-font-size3);
+  padding: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
 }
 
 .lw-panel-curr-nb {
-    font-size: var(--jp-ui-font-size2);
-    padding: 10px;
-    color: cornflowerblue;
-    font-weight: 700;
+  font-size: var(--jp-ui-font-size2);
+  padding: 10px;
+  color: cornflowerblue;
+  font-weight: 700;
 }
 
 .lw-panel-editor {
-    margin: 10px;
-    width: 350px;
-    height: 200px;
-    overflow: hidden;
-    border-radius: 5px;
+  margin: 10px;
+  width: 350px;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 5px;
 }
 
 .section-header {
-    padding: 10px;
-    margin: 0;
-    text-align: center;
-    background: lightseagreen;
-    color: white;
-    font-size: medium;
+  padding: 10px;
+  margin: 0;
+  text-align: center;
+  background: lightseagreen;
+  color: white;
+  font-size: medium;
 }
 
-.jp-Dialog-content, .jp-Dialog-header {
-    padding: 0 !important;
+.jp-Dialog-content,
+.jp-Dialog-header {
+  padding: 0 !important;
 }
 
 .lw-panel-editor-container {
-    width: 240px;
-    height: 200px;
-    margin: 10px;
+  width: 240px;
+  height: 200px;
+  margin: 10px;
 }
 
 .lw-panel-table {
-    width: 350px !important;
-    margin: 15px !important;
+  width: 350px !important;
+  margin: 15px !important;
 }
 
 .lw-panel-preview {
-    font-size: var(--jp-ui-font-size1);
-    margin: 20px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
+  font-size: var(--jp-ui-font-size1);
+  margin: 20px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 .lw-cell-field {
-    display: block;
-    margin: 20px;
+  display: block;
+  margin: 20px;
 }
 
 .lw-panel-button {
-    margin: 10px !important;
+  margin: 10px !important;
 }
 
 .add-catalog-progress {
-    margin-bottom: -10px;
-    margin-left: 10px;
+  margin-bottom: -10px;
+  margin-left: 10px;
 }
 
 .cell-submit-link {
-    color: #106ba3;
-    text-decoration: underline;
+  color: #106ba3;
+  text-decoration: underline;
 }
 
 .cell-submit-text {
-    font-size: medium;
-    margin: 10px;
+  font-size: medium;
+  margin: 10px;
 }
 
 .cell-submit-box {
-    padding: 10px;
-    align-items: center;
-    display: flex;
-    flex-direction: column;
+  padding: 10px;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
 }

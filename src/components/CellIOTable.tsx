@@ -57,7 +57,7 @@ export const CellIOTable: React.FC<ICellIOTable> = ({
                   component="th"
                   scope="row"
                   style={{
-                    width: '15%',
+                    width: '15%'
                   }}
                 >
                   <FormControl fullWidth>
@@ -65,7 +65,7 @@ export const CellIOTable: React.FC<ICellIOTable> = ({
                       labelId="io-types-select-label"
                       id={nodeId + '-' + ioItem + '-select'}
                       label="Type"
-                      value={(getType(ioItem) === null) ? '' : getType(ioItem)}
+                      value={getType(ioItem) === null ? '' : getType(ioItem)}
                       error={getType(ioItem) === null}
                       onChange={event => {
                         updateType(event, ioItem);

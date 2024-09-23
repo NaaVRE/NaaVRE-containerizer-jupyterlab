@@ -3,4 +3,5 @@ node_modules
 **/lib
 **/package.json
 !/package.json
+**/venv
 NaaVRE_containerizer_jupyterlab

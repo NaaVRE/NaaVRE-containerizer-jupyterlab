@@ -167,6 +167,16 @@ export class CellTracker extends React.Component<IProps, IState> {
     }
   };
 
+  getTypeSelections = (cell: VRECell): { [type: string]: boolean } => {
+    const typeSelections: { [type: string]: boolean } = {};
+    [cell.inputs, cell.outputs, cell.params, cell.secrets].forEach(varList => {
+      varList.forEach((varName: string) => {
+        typeSelections[varName] = cell.types[varName] !== null;
+      });
+    });
+    return typeSelections;
+  };
+
   extractCell = async (notebookModel: INotebookModel | null, save = false) => {
     if (notebookModel === null) {
       return null;
@@ -190,26 +200,13 @@ export class CellTracker extends React.Component<IProps, IState> {
     )
       .then(data => {
         const extractedCell = data as VRECell;
-        this.setState({ currentCell: extractedCell });
-
-        const typeSelections: { [type: string]: boolean } = {};
-        extractedCell.inputs.forEach((el: string) => {
-          typeSelections[el] = this.getVarType(el) !== null;
-        });
-        extractedCell.outputs.forEach((el: string) => {
-          typeSelections[el] = this.getVarType(el) !== null;
-        });
-        extractedCell.params.forEach((el: string) => {
-          typeSelections[el] = this.getVarType(el) !== null;
-        });
-        extractedCell.secrets.forEach((el: string) => {
-          typeSelections[el] = this.getVarType(el) !== null;
-        });
+        const typeSelections = this.getTypeSelections(extractedCell);
 
         this.setState({
           cellAnalyzed: true,
           extractorError: '',
           loading: false,
+          currentCell: extractedCell,
           typeSelections: typeSelections
         });
 

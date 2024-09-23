@@ -56,7 +56,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: extension-artifacts
-        path: dist/NaaVRE_containerizer_jupyterlab*
+        path: dist/naavre_containerizer_jupyterlab*
         if-no-files-found: error
 
   test_isolated:
@@ -79,7 +79,7 @@ jobs:
         sudo rm -rf $(which node)
         sudo rm -rf $(which node)
 
-        pip install "jupyterlab>=4.0.0,<5" NaaVRE_containerizer_jupyterlab*.whl
+        pip install "jupyterlab>=4.0.0,<5" naavre_containerizer_jupyterlab*.whl
 
 
         jupyter labextension list
@@ -109,7 +109,7 @@ jobs:
     - name: Install the extension
       run: |
         set -eux
-        python -m pip install "jupyterlab>=4.0.0,<5" NaaVRE_containerizer_jupyterlab*.whl
+        python -m pip install "jupyterlab>=4.0.0,<5" naavre_containerizer_jupyterlab*.whl
 
     - name: Install dependencies
       working-directory: ui-tests

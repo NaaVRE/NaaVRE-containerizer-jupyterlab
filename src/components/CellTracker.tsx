@@ -260,6 +260,7 @@ export class CellTracker extends React.Component<IProps, IState> {
       ...this.state.currentCell,
       inputs: updatedInputs
     } as VRECell;
+    delete updatedCell.types[input];
 
     const updatedTypeSelections = this.state.typeSelections;
     delete updatedTypeSelections[input];
@@ -277,6 +278,7 @@ export class CellTracker extends React.Component<IProps, IState> {
       ...this.state.currentCell,
       outputs: updatedOutputs
     } as VRECell;
+    delete updatedCell.types[output];
 
     const updatedTypeSelections = this.state.typeSelections;
     delete updatedTypeSelections[output];
@@ -294,6 +296,7 @@ export class CellTracker extends React.Component<IProps, IState> {
       ...this.state.currentCell,
       params: updatedParams
     } as VRECell;
+    delete updatedCell.types[param];
 
     const updatedTypeSelections = this.state.typeSelections;
     delete updatedTypeSelections[param];
@@ -311,6 +314,7 @@ export class CellTracker extends React.Component<IProps, IState> {
       ...this.state.currentCell,
       secrets: updatedSecrets
     } as VRECell;
+    delete updatedCell.types[secret];
 
     const updatedTypeSelections = this.state.typeSelections;
     delete updatedTypeSelections[secret];

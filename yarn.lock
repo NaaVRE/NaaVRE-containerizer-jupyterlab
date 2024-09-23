@@ -3391,9 +3391,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mrblenny/react-flow-chart@patch:@mrblenny/react-flow-chart@npm%3A0.0.14#./.yarn/patches/@mrblenny-react-flow-chart-npm-0.0.14-8f356f8349.patch::locator=NaaVRE-containerizer-jupyterlab%40workspace%3A.":
+"@mrblenny/react-flow-chart@patch:@mrblenny/react-flow-chart@npm%3A0.0.14#./.yarn/patches/@mrblenny-react-flow-chart-npm-0.0.14-8f356f8349.patch::locator=%40naavre%2Fcontainerizer-jupyterlab%40workspace%3A.":
   version: 0.0.14
-  resolution: "@mrblenny/react-flow-chart@patch:@mrblenny/react-flow-chart@npm%3A0.0.14#./.yarn/patches/@mrblenny-react-flow-chart-npm-0.0.14-8f356f8349.patch::version=0.0.14&hash=4fa39c&locator=NaaVRE-containerizer-jupyterlab%40workspace%3A."
+  resolution: "@mrblenny/react-flow-chart@patch:@mrblenny/react-flow-chart@npm%3A0.0.14#./.yarn/patches/@mrblenny-react-flow-chart-npm-0.0.14-8f356f8349.patch::version=0.0.14&hash=4fa39c&locator=%40naavre%2Fcontainerizer-jupyterlab%40workspace%3A."
   dependencies:
     pathfinding: ^0.4.18
     react-draggable: ^4.4.3
@@ -3584,6 +3584,51 @@ __metadata:
   checksum: 6f8068f07f60a842fcb2e2540eecbd9c5f04df695bcc427184720e8ae138ae689fefd3c20147ab7c76e809ede6e10f5e08d1c34cd3a8b09bd22d2020a666a96f
   languageName: node
   linkType: hard
+
+"@naavre/containerizer-jupyterlab@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@naavre/containerizer-jupyterlab@workspace:."
+  dependencies:
+    "@emotion/react": 11.11.4
+    "@emotion/styled": 11.11.5
+    "@jupyterlab/application": ^4.0.0
+    "@jupyterlab/builder": ^4.0.0
+    "@jupyterlab/settingregistry": ^4.0.0
+    "@jupyterlab/testutils": ^4.0.0
+    "@material-ui/core": 4.12.4
+    "@material-ui/icons": 4.11.2
+    "@mrblenny/react-flow-chart": 0.0.14
+    "@mui/icons-material": 5.6.1
+    "@mui/material": 5.13.6
+    "@types/jest": ^29.2.0
+    "@types/json-schema": ^7.0.11
+    "@types/lodash": 4.17.7
+    "@types/react": ^18.0.26
+    "@types/react-addons-linked-state-mixin": ^0.14.22
+    "@types/styled-components": ^5.1.34
+    "@typescript-eslint/eslint-plugin": ^6.1.0
+    "@typescript-eslint/parser": ^6.1.0
+    css-loader: ^6.7.1
+    eslint: ^8.36.0
+    eslint-config-prettier: ^8.8.0
+    eslint-plugin-prettier: ^5.0.0
+    jest: ^29.2.0
+    lodash: 4.17.21
+    npm-run-all: ^4.1.5
+    prettier: ^3.0.0
+    rimraf: ^5.0.1
+    source-map-loader: ^1.0.2
+    style-loader: ^3.3.1
+    styled-components: 6.1.12
+    stylelint: ^15.10.1
+    stylelint-config-recommended: ^13.0.0
+    stylelint-config-standard: ^34.0.0
+    stylelint-csstree-validator: ^3.0.0
+    stylelint-prettier: ^4.0.0
+    typescript: ~5.0.2
+    yjs: ^13.5.0
+  languageName: unknown
+  linkType: soft
 
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
@@ -4321,51 +4366,6 @@ __metadata:
   checksum: 8ed0d477ce3bc9c6fe2bf6a6a2cc316bb9c4127c5a7827bae947fa8ec34c7092395c5a283cc300c05b5fa01cbbfa1f938f410a7bf75db7c7846fea41949989ec
   languageName: node
   linkType: hard
-
-"NaaVRE-containerizer-jupyterlab@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "NaaVRE-containerizer-jupyterlab@workspace:."
-  dependencies:
-    "@emotion/react": 11.11.4
-    "@emotion/styled": 11.11.5
-    "@jupyterlab/application": ^4.0.0
-    "@jupyterlab/builder": ^4.0.0
-    "@jupyterlab/settingregistry": ^4.0.0
-    "@jupyterlab/testutils": ^4.0.0
-    "@material-ui/core": 4.12.4
-    "@material-ui/icons": 4.11.2
-    "@mrblenny/react-flow-chart": 0.0.14
-    "@mui/icons-material": 5.6.1
-    "@mui/material": 5.13.6
-    "@types/jest": ^29.2.0
-    "@types/json-schema": ^7.0.11
-    "@types/lodash": 4.17.7
-    "@types/react": ^18.0.26
-    "@types/react-addons-linked-state-mixin": ^0.14.22
-    "@types/styled-components": ^5.1.34
-    "@typescript-eslint/eslint-plugin": ^6.1.0
-    "@typescript-eslint/parser": ^6.1.0
-    css-loader: ^6.7.1
-    eslint: ^8.36.0
-    eslint-config-prettier: ^8.8.0
-    eslint-plugin-prettier: ^5.0.0
-    jest: ^29.2.0
-    lodash: 4.17.21
-    npm-run-all: ^4.1.5
-    prettier: ^3.0.0
-    rimraf: ^5.0.1
-    source-map-loader: ^1.0.2
-    style-loader: ^3.3.1
-    styled-components: 6.1.12
-    stylelint: ^15.10.1
-    stylelint-config-recommended: ^13.0.0
-    stylelint-config-standard: ^34.0.0
-    stylelint-csstree-validator: ^3.0.0
-    stylelint-prettier: ^4.0.0
-    typescript: ~5.0.2
-    yjs: ^13.5.0
-  languageName: unknown
-  linkType: soft
 
 "abab@npm:^2.0.3, abab@npm:^2.0.5, abab@npm:^2.0.6":
   version: 2.0.6

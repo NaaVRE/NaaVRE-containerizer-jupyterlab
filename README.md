@@ -13,7 +13,7 @@ NaaVRE cells containerizer frontend on Jupyter Lab
 To install the extension, execute:
 
 ```bash
-pip install NaaVRE_containerizer_jupyterlab
+pip install NaaVRE-containerizer-jupyterlab
 ```
 
 ## Uninstall
@@ -21,7 +21,7 @@ pip install NaaVRE_containerizer_jupyterlab
 To remove the extension, execute:
 
 ```bash
-pip uninstall NaaVRE_containerizer_jupyterlab
+pip uninstall NaaVRE-containerizer-jupyterlab
 ```
 
 ## Contributing
@@ -65,7 +65,7 @@ jupyter lab build --minimize=False
 ### Development uninstall
 
 ```bash
-pip uninstall NaaVRE_containerizer_jupyterlab
+pip uninstall NaaVRE-containerizer-jupyterlab
 ```
 
 In development mode, you will also need to remove the symlink created by `jupyter labextension develop`

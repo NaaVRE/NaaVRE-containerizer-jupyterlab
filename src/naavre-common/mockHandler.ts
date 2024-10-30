@@ -211,7 +211,7 @@ const containerizeResponse = {
   image_version: '07b50c4'
 };
 
-export async function NaaVREExternalService(
+export async function MockNaaVREExternalService(
   method: string,
   url: string,
   headers = {},

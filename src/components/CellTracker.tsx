@@ -84,6 +84,12 @@ export class CellTracker extends React.Component<IProps, IState> {
       'GET',
       `${this.props.settings.containerizerServiceUrl}/base-image-tags`
     )
+      .then(resp => {
+        if (resp.status_code !== 200) {
+          throw `${resp.status_code} ${resp.reason}`;
+        }
+        return JSON.parse(resp.content);
+      })
       .then(data => {
         const updatedBaseImages = Object.entries(data).map(([name, image]) => ({
           name,
@@ -94,6 +100,7 @@ export class CellTracker extends React.Component<IProps, IState> {
         this.setState({ baseImages: updatedBaseImages });
       })
       .catch(reason => {
+        console.log(`Could not retrieve base image tags: ${reason}`);
         console.log(reason);
       });
   };

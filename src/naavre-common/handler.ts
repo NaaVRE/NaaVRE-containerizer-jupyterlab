@@ -52,7 +52,7 @@ export async function NaaVREExternalService(
   url: string,
   headers = {},
   data = {}
-): Promise<INaaVREExternalServiceResponse | string | object> {
+): Promise<INaaVREExternalServiceResponse> {
   const endPoint = 'naavre-communicator/external-service';
   const init = {
     method: 'POST',
@@ -69,14 +69,5 @@ export async function NaaVREExternalService(
   const resp: INaaVREExternalServiceResponse = await requestAPI(endPoint, init);
 
   console.log(resp);
-
-  if (resp.status_code !== 200) {
-    return resp;
-  } else {
-    try {
-      return JSON.parse(resp.content);
-    } catch (error) {
-      return resp.content;
-    }
-  }
+  return resp;
 }

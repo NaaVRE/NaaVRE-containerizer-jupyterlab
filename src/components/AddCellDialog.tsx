@@ -44,10 +44,19 @@ export class AddCellDialog extends React.Component<IAddCellDialog, IState> {
         cell: this.props.cell
       }
     )
-      .then(() => {
-        this.setState({ loading: false });
+      .then(resp => {
+        if (resp.status_code !== 200) {
+          throw `${resp.status_code} ${resp.reason}`;
+        }
+        return JSON.parse(resp.content);
+      })
+      .then(data => {
+        this.setState({
+          loading: false
+        });
       })
       .catch(reason => {
+        console.log(`Could not containerize cell: ${reason}`);
         console.log(reason);
         alert(
           'Error creating  cell : ' +

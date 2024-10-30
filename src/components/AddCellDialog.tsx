@@ -82,9 +82,7 @@ export class AddCellDialog extends React.Component<IAddCellDialog, IState> {
       <ThemeProvider theme={theme}>
         <p className="section-header">Create Cell</p>
         <CatalogBody>
-          <div
-            className="cell-submit-box"
-          >
+          <div className="cell-submit-box">
             {this.state.loading ? (
               <>
                 <CircularProgress />

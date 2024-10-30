@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { MockNaaVREExternalService } from '../naavre-common/mockHandler';
+import { NaaVREExternalService } from '../naavre-common/handler';
 import { CellPreview } from '../naavre-common/CellPreview';
 import { VRECell } from '../naavre-common/types';
 import { INotebookModel, Notebook, NotebookPanel } from '@jupyterlab/notebook';
@@ -79,7 +80,7 @@ export class CellTracker extends React.Component<IProps, IState> {
   }
 
   loadBaseImages = async () => {
-    MockNaaVREExternalService(
+    NaaVREExternalService(
       'GET',
       `${this.props.settings.containerizerServiceUrl}/base-image-tags`
     )

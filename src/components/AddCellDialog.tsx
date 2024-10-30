@@ -4,7 +4,7 @@ import { green } from '@mui/material/colors';
 import * as React from 'react';
 import { theme } from '../Theme';
 import { VRECell } from '../naavre-common/types';
-import { MockNaaVREExternalService } from '../naavre-common/mockHandler';
+import { NaaVREExternalService } from '../naavre-common/handler';
 import { IVREPanelSettings } from '../VREPanel';
 
 const CatalogBody = styled('div')({
@@ -36,7 +36,7 @@ export class AddCellDialog extends React.Component<IAddCellDialog, IState> {
   }
 
   createCell = async () => {
-    MockNaaVREExternalService(
+    NaaVREExternalService(
       'POST',
       `${this.props.settings.containerizerServiceUrl}/containerize`,
       {},

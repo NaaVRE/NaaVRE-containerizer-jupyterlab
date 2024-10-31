@@ -206,6 +206,12 @@ export class CellTracker extends React.Component<IProps, IState> {
         notebook: notebookModel.toJSON()
       }
     )
+      .then(resp => {
+        if (resp.status_code !== 200) {
+          throw `${resp.status_code} ${resp.reason}`;
+        }
+        return JSON.parse(resp.content);
+      })
       .then(data => {
         const extractedCell = data as VRECell;
         const typeSelections = this.getTypeSelections(extractedCell);

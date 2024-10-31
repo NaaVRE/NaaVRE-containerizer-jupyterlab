@@ -6,6 +6,7 @@ import { theme } from '../Theme';
 import { VRECell } from '../naavre-common/types';
 import { NaaVREExternalService } from '../naavre-common/handler';
 import { IVREPanelSettings } from '../VREPanel';
+import { containerizerToCatalogueCell } from '../services/cellConverter';
 
 const CatalogBody = styled('div')({
   padding: '20px',
@@ -62,18 +63,35 @@ export class AddCellDialog extends React.Component<IAddCellDialog, IState> {
         return JSON.parse(resp.content);
       })
       .then(data => {
-        this.setState({
-          loading: false,
-          cellWorkflow: data
-        });
+        this.setState({ cellWorkflow: data });
       })
       .catch(reason => {
-        console.log(`Could not containerize cell: ${reason}`);
+        const msg = `Could not containerize cell: ${reason}`;
+        console.log(msg);
         console.log(reason);
-        this.setState({
-          loading: false,
-          error: `Could not containerize cell: ${reason}`
-        });
+        this.setState({ error: msg });
+      })
+      .then(() => {
+        return NaaVREExternalService(
+          'POST',
+          `${this.props.settings.catalogueServiceUrl}/workflow-cells/`,
+          {},
+          containerizerToCatalogueCell(this.props.cell, this.props.settings)
+        );
+      })
+      .then(resp => {
+        if (resp.status_code !== 201) {
+          throw `${resp.status_code} ${resp.reason}`;
+        }
+      })
+      .catch(reason => {
+        const msg = `Could not add cell to catalogue: ${reason}`;
+        console.log(msg);
+        console.log(reason);
+        this.setState({ error: msg });
+      })
+      .then(() => {
+        this.setState({ loading: false });
       });
   };
 

@@ -5,7 +5,7 @@ import { ServerConnection } from '@jupyterlab/services';
 export interface INaaVREExternalServiceResponse {
   status_code: number;
   reason: string;
-  header: object;
+  headers: object;
   content: string;
 }
 

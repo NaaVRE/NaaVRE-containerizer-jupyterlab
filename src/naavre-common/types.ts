@@ -20,8 +20,67 @@ export declare type VRECell = {
   node_id: string;
   container_source: string;
   global_conf: object;
-  base_image: { image: { build: string; runtime: string } } | null;
+  base_image: { build: string; runtime: string } | null;
   image_version: string;
   kernel: string;
   notebook_dict: object;
 };
+
+export namespace NaaVRECatalogue {
+  export namespace BaseAssets {
+    export interface IBaseAsset {
+      id?: string;
+      title: string;
+      description?: string;
+      created?: string;
+      modified?: string;
+      owner?: string;
+      virtual_lab?: string;
+    }
+  }
+  export namespace WorkflowCells {
+    interface IBaseImage {
+      build: string;
+      runtime: string;
+    }
+
+    interface IDependency {
+      name: string;
+      module?: string;
+      asname?: string;
+    }
+
+    interface IBaseVariable {
+      name: string;
+      type: string;
+    }
+
+    interface IInput extends IBaseVariable {}
+
+    interface IOutput extends IBaseVariable {}
+
+    interface IConf {
+      name: string;
+      assignation: string;
+    }
+
+    interface IParam extends IBaseVariable {
+      default_value?: string;
+    }
+
+    interface ISecret extends IBaseVariable {}
+
+    export interface ICell extends BaseAssets.IBaseAsset {
+      container_image: string;
+      base_container_image?: IBaseImage;
+      dependencies?: Array<IDependency>;
+      inputs?: Array<IInput>;
+      outputs?: Array<IOutput>;
+      confs?: Array<IConf>;
+      params?: Array<IParam>;
+      secrets?: Array<ISecret>;
+      kernel?: string;
+      source_url?: string;
+    }
+  }
+}

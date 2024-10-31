@@ -222,7 +222,7 @@ export async function MockNaaVREExternalService(
   let resp: INaaVREExternalServiceResponse = {
     status_code: 404,
     reason: 'Cannot mock this request',
-    header: {},
+    headers: {},
     content: ''
   };
 
@@ -231,7 +231,7 @@ export async function MockNaaVREExternalService(
       resp = {
         status_code: 200,
         reason: 'OK',
-        header: {},
+        headers: {},
         content: JSON.stringify(baseImageTagsResponse)
       };
     }
@@ -240,7 +240,7 @@ export async function MockNaaVREExternalService(
       resp = {
         status_code: 200,
         reason: 'OK',
-        header: {},
+        headers: {},
         content: JSON.stringify(extractResponse)
       };
     }
@@ -249,7 +249,7 @@ export async function MockNaaVREExternalService(
       resp = {
         status_code: 200,
         reason: 'OK',
-        header: {},
+        headers: {},
         content: JSON.stringify(containerizeResponse)
       };
     }
@@ -258,7 +258,7 @@ export async function MockNaaVREExternalService(
       resp = {
         status_code: 200,
         reason: 'OK',
-        header: {},
+        headers: {},
         content: JSON.stringify({})
       };
     }

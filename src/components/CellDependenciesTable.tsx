@@ -10,7 +10,11 @@ import {
 } from '@material-ui/core';
 
 interface ICellDependenciesTable {
-  items: [];
+  items: Array<{
+    name: string;
+    module?: string;
+    asname?: string;
+  }>;
 }
 
 export const CellDependenciesTable: React.FC<ICellDependenciesTable> = ({

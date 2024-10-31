@@ -4,13 +4,17 @@ export declare type VRECell = {
   title: string;
   task_name: string;
   original_source: string;
-  inputs: [];
-  outputs: [];
-  params: [];
+  inputs: Array<string>;
+  outputs: Array<string>;
+  params: Array<string>;
   param_values: { [name: string]: string | null };
-  secrets: [];
-  confs: object;
-  dependencies: [];
+  secrets: Array<string>;
+  confs: { [name: string]: string };
+  dependencies: Array<{
+    name: string;
+    module?: string;
+    asname?: string;
+  }>;
   types: { [id: string]: string | null };
   chart_obj: IChart;
   node_id: string;

@@ -16,7 +16,7 @@ import CloseIcon from '@material-ui/icons/Close';
 
 interface ICellIOTable {
   title: string;
-  ioItems: [];
+  ioItems: Array<string>;
   nodeId: string;
   getType: (v: string) => string | null;
   updateType: (

@@ -206,9 +206,11 @@ const extractResponse = {
 };
 
 const containerizeResponse = {
-  wf_id: '7f798cdb-45fc-4db3-8293-5825147bdf56',
+  workflow_id: 'e347d158-389b-46c9-807d-bd0725d89fa3',
   dispatched_github_workflow: true,
-  image_version: '07b50c4'
+  image_version: '8d1b920',
+  workflow_url:
+    'https://github.com/QCDIS/NaaVRE-cells-test-3/actions/runs/11609137173/job/32325795875'
 };
 
 export async function MockNaaVREExternalService(
@@ -216,8 +218,8 @@ export async function MockNaaVREExternalService(
   url: string,
   headers = {},
   data = {}
-): Promise<INaaVREExternalServiceResponse | string | object> {
-  let resp: INaaVREExternalServiceResponse | string | object = {
+): Promise<INaaVREExternalServiceResponse> {
+  let resp: INaaVREExternalServiceResponse = {
     status_code: 404,
     reason: 'Cannot mock this request',
     header: {},
@@ -226,19 +228,39 @@ export async function MockNaaVREExternalService(
 
   if (url.endsWith('/NaaVRE-containerizer-service/base-image-tags')) {
     if (method === 'GET') {
-      resp = baseImageTagsResponse;
+      resp = {
+        status_code: 200,
+        reason: 'OK',
+        header: {},
+        content: JSON.stringify(baseImageTagsResponse)
+      };
     }
   } else if (url.endsWith('/NaaVRE-containerizer-service/extract')) {
     if (method === 'POST') {
-      resp = extractResponse;
+      resp = {
+        status_code: 200,
+        reason: 'OK',
+        header: {},
+        content: JSON.stringify(extractResponse)
+      };
     }
   } else if (url.endsWith('/NaaVRE-containerizer-service/containerize')) {
     if (method === 'POST') {
-      resp = containerizeResponse;
+      resp = {
+        status_code: 200,
+        reason: 'OK',
+        header: {},
+        content: JSON.stringify(containerizeResponse)
+      };
     }
   } else if (url.endsWith('/NaaVRE-catalogue-service/cells')) {
     if (method === 'POST') {
-      resp = {};
+      resp = {
+        status_code: 200,
+        reason: 'OK',
+        header: {},
+        content: JSON.stringify({})
+      };
     }
   }
 
@@ -251,6 +273,6 @@ export async function MockNaaVREExternalService(
     },
     response: resp
   });
-  await new Promise(r => setTimeout(r, 2000));
+  await new Promise(r => setTimeout(r, 500));
   return resp;
 }

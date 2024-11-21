@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { MockNaaVREExternalService } from '../naavre-common/mockHandler';
 import { NaaVREExternalService } from '../naavre-common/handler';
 import { CellPreview } from '../naavre-common/CellPreview';
 import { VRECell } from '../naavre-common/types';
@@ -195,15 +194,17 @@ export class CellTracker extends React.Component<IProps, IState> {
       extractorError: ''
     });
 
-    MockNaaVREExternalService(
+    NaaVREExternalService(
       'POST',
-      `${this.props.settings.containerizerServiceUrl}/extract`,
+      `${this.props.settings.containerizerServiceUrl}/extract_cell`,
       {},
       {
-        save: save,
-        kernel,
-        cell_index: this.state.currentCellIndex,
-        notebook: notebookModel.toJSON()
+        data: {
+          save: save,
+          kernel,
+          cell_index: this.state.currentCellIndex,
+          notebook: notebookModel.toJSON()
+        }
       }
     )
       .then(resp => {

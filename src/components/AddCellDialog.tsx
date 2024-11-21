@@ -74,7 +74,8 @@ export class AddCellDialog extends React.Component<IAddCellDialog, IState> {
         // Add missing fields
         this.props.cell.container_image = 'FIXME-dummy-container-image:latest'; // FIXME: this needs to come from the backend
         this.props.cell.source_url = ''; // FIXME: this needs to come from the backend
-        this.props.cell.virtual_lab = this.props.settings.virtualLab || undefined;
+        this.props.cell.virtual_lab =
+          this.props.settings.virtualLab || undefined;
 
         return NaaVREExternalService(
           'POST',

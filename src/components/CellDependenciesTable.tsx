@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { NaaVRECatalogue } from '../naavre-common/types';
+
 import {
   Paper,
   Table,
@@ -10,11 +12,7 @@ import {
 } from '@material-ui/core';
 
 interface ICellDependenciesTable {
-  items: Array<{
-    name: string;
-    module?: string;
-    asname?: string;
-  }>;
+  items: Array<NaaVRECatalogue.WorkflowCells.IDependency>;
 }
 
 export const CellDependenciesTable: React.FC<ICellDependenciesTable> = ({

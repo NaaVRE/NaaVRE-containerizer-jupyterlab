@@ -3,10 +3,9 @@ import { CheckCircleOutline, ErrorOutline } from '@mui/icons-material';
 import { green, red } from '@mui/material/colors';
 import * as React from 'react';
 import { theme } from '../Theme';
-import { VRECell } from '../naavre-common/types';
+import { NaaVRECatalogue } from '../naavre-common/types';
 import { NaaVREExternalService } from '../naavre-common/handler';
 import { IVREPanelSettings } from '../VREPanel';
-import { containerizerToCatalogueCell } from '../services/cellConverter';
 
 const CatalogBody = styled('div')({
   padding: '20px',
@@ -16,7 +15,7 @@ const CatalogBody = styled('div')({
 });
 
 interface IAddCellDialog {
-  cell: VRECell;
+  cell: NaaVRECatalogue.WorkflowCells.ICell;
   closeDialog: () => void;
   settings: IVREPanelSettings;
 }
@@ -72,11 +71,16 @@ export class AddCellDialog extends React.Component<IAddCellDialog, IState> {
         this.setState({ error: msg });
       })
       .then(() => {
+        // Add missing fields
+        this.props.cell.container_image = 'FIXME-dummy-container-image:latest'; // FIXME: this needs to come from the backend
+        this.props.cell.source_url = ''; // FIXME: this needs to come from the backend
+        this.props.cell.virtual_lab = this.props.settings.virtualLab || undefined;
+
         return NaaVREExternalService(
           'POST',
           `${this.props.settings.catalogueServiceUrl}/workflow-cells/`,
           {},
-          containerizerToCatalogueCell(this.props.cell, this.props.settings)
+          this.props.cell
         );
       })
       .then(resp => {

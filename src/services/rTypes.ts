@@ -1,5 +1,5 @@
 import { NotebookPanel } from '@jupyterlab/notebook';
-import { VRECell } from '../naavre-common/types';
+import { NaaVRECatalogue } from '../naavre-common/types';
 import { Cell } from '@jupyterlab/cells';
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
 
@@ -8,9 +8,9 @@ export const detectType = async ({
   currentCell
 }: {
   notebook: NotebookPanel | null;
-  currentCell: VRECell;
+  currentCell: NaaVRECatalogue.WorkflowCells.ICell;
 }): Promise<{
-  updatedCell: VRECell;
+  updatedCell: NaaVRECatalogue.WorkflowCells.ICell;
   updatedTypeSelections: { [key: string]: boolean };
 }> => {
   const activeCell = notebook!.content.activeCell;
@@ -32,15 +32,18 @@ export const detectType = async ({
   }
 
   // Get original source code
-  // const cellContent = currentCell.model.value.text; // FIXME
+  // const cellContent = currentCell.model.value.text;
   const cellContent = 'xyz';
 
   // Retrieve inputs, outputs, and params from extractedCell
   const extractedCell = currentCell;
-  const types = extractedCell['types'];
   const inputs = extractedCell['inputs'];
   const outputs = extractedCell['outputs'];
   const params = extractedCell['params'];
+  const types: { [key: string]: string | null } = {};
+  inputs.forEach(v => (types[v.name] = v.type));
+  outputs.forEach(v => (types[v.name] = v.type));
+  params.forEach(v => (types[v.name] = v.type));
 
   // Function to send code to kernel and handle response
   const sendCodeToKernel = async (
@@ -65,7 +68,7 @@ export const detectType = async ({
           typeString = typeString.replace(/['"]/g, '');
           const varName = vars[0];
 
-          let detectedType = null;
+          let detectedType: string | null;
           if (typeString === 'integer') {
             detectedType = 'int';
           } else if (typeString === 'character') {
@@ -126,16 +129,16 @@ export const detectType = async ({
   // Create code with typeof() for inputs and params
   let inputParamSource = '';
   inputs.forEach(input => {
-    inputParamSource += `\ntypeof(${input})`;
+    inputParamSource += `\ntypeof(${input.name})`;
   });
   params.forEach(param => {
-    inputParamSource += `\ntypeof(${param})`;
+    inputParamSource += `\ntypeof(${param.name})`;
   });
 
   // Send code to check types of inputs and params
   const detectedInputParamTypes = await sendCodeToKernel(inputParamSource, [
-    ...inputs,
-    ...params
+    ...inputs.map(v => v.name),
+    ...params.map(v => v.name)
   ]);
   console.log('Detected Input and Param Types:', detectedInputParamTypes);
 
@@ -145,35 +148,41 @@ export const detectType = async ({
   // Create code with typeof() for outputs
   let outputSource = '';
   outputs.forEach(output => {
-    outputSource += `\ntypeof(${output})`;
+    outputSource += `\ntypeof(${output.name})`;
   });
 
   // Send code to check types of outputs
   const detectedOutputTypes = await sendCodeToKernel(outputSource, [
-    ...outputs
+    ...outputs.map(v => v.name)
   ]);
   console.log('Detected Output Types:', detectedOutputTypes);
 
   // Update the state with the detected types
   const newTypes = {
-    ...currentCell.types,
+    ...types,
     ...detectedInputParamTypes,
     ...detectedOutputTypes
   };
-  const updatedCell = { ...currentCell, types: newTypes };
-
+  const updatedCell = { ...currentCell };
   const typeSelections: { [key: string]: boolean } = {};
 
-  updatedCell.inputs.forEach(el => {
-    typeSelections[el] = newTypes[el] !== null;
+  updatedCell.inputs.forEach(v => {
+    if (v.name === v.name) {
+      v.type = newTypes[v.name];
+    }
+    typeSelections[v.name] = newTypes[v.name] !== null;
   });
-
-  updatedCell.outputs.forEach(el => {
-    typeSelections[el] = newTypes[el] !== null;
+  updatedCell.outputs.forEach(v => {
+    if (v.name === v.name) {
+      v.type = newTypes[v.name];
+    }
+    typeSelections[v.name] = newTypes[v.name] !== null;
   });
-
-  updatedCell.params.forEach(el => {
-    typeSelections[el] = newTypes[el] !== null;
+  updatedCell.params.forEach(v => {
+    if (v.name === v.name) {
+      v.type = newTypes[v.name];
+    }
+    typeSelections[v.name] = newTypes[v.name] !== null;
   });
 
   return {

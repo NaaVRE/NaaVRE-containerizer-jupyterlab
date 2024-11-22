@@ -40,7 +40,6 @@ interface IState {
   baseImages: any[];
   cellAnalyzed: boolean;
   currentCell: NaaVRECatalogue.WorkflowCells.ICell;
-  currentCellIndex: number;
   extractorError: string;
   isDialogOpen: boolean;
   loading: boolean;
@@ -52,7 +51,6 @@ const DefaultState: IState = {
   baseImages: [],
   cellAnalyzed: false,
   currentCell: DefaultCell,
-  currentCellIndex: -1,
   extractorError: '',
   isDialogOpen: false,
   loading: false,
@@ -108,7 +106,6 @@ export class CellTracker extends React.Component<IProps, IState> {
     _activeCell
   ) => {
     this.resetState();
-    this.setState({ currentCellIndex: notebook.activeCellIndex });
   };
 
   connectAndInitWhenReady = (notebook: NotebookPanel) => {
@@ -169,7 +166,11 @@ export class CellTracker extends React.Component<IProps, IState> {
     return typeSelections;
   };
 
-  extractCell = async (notebookModel: INotebookModel | null, save = false) => {
+  extractCell = async (
+    notebookModel: INotebookModel | null,
+    cellIndex: number,
+    save = false
+  ) => {
     if (notebookModel === null) {
       return null;
     }
@@ -187,7 +188,7 @@ export class CellTracker extends React.Component<IProps, IState> {
         data: {
           save: save,
           kernel,
-          cell_index: this.state.currentCellIndex,
+          cell_index: cellIndex,
           notebook: notebookModel.toJSON()
         }
       }
@@ -245,7 +246,10 @@ export class CellTracker extends React.Component<IProps, IState> {
   };
 
   onAnalyzeCell = () => {
-    this.extractCell(this.props.notebook!.model)
+    this.extractCell(
+      this.props.notebook!.model,
+      this.props.notebook!.content.activeCellIndex
+    )
       .then(() => {})
       .catch(reason => {
         console.log('Error extracting cell', reason);

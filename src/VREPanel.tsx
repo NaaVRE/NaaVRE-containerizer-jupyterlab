@@ -7,11 +7,15 @@ import { Slot } from '@lumino/signaling';
 import { Divider } from '@material-ui/core';
 
 export interface IVREPanelSettings {
+  virtualLab: string | null;
   containerizerServiceUrl: string | null;
+  catalogueServiceUrl: string | null;
 }
 
 export const DefaultVREPanelSettings: IVREPanelSettings = {
-  containerizerServiceUrl: null
+  virtualLab: null,
+  containerizerServiceUrl: null,
+  catalogueServiceUrl: null
 };
 
 export const VREPanelComponent = ({

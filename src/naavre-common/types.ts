@@ -1,23 +1,58 @@
-import { IChart } from '@mrblenny/react-flow-chart';
+export namespace NaaVRECatalogue {
+  export namespace BaseAssets {
+    export interface IBaseAsset {
+      id?: string;
+      title: string;
+      description?: string;
+      created?: string;
+      modified?: string;
+      owner?: string;
+      virtual_lab?: string | null;
+    }
+  }
+  export namespace WorkflowCells {
+    export interface IBaseImage {
+      build: string;
+      runtime: string;
+    }
 
-export declare type VRECell = {
-  title: string;
-  task_name: string;
-  original_source: string;
-  inputs: [];
-  outputs: [];
-  params: [];
-  param_values: { [name: string]: string | null };
-  secrets: [];
-  confs: object;
-  dependencies: [];
-  types: { [id: string]: string | null };
-  chart_obj: IChart;
-  node_id: string;
-  container_source: string;
-  global_conf: object;
-  base_image: { image: { build: string; runtime: string } } | null;
-  image_version: string;
-  kernel: string;
-  notebook_dict: object;
-};
+    export interface IDependency {
+      name: string;
+      module?: string;
+      asname?: string;
+    }
+
+    export interface IBaseVariable {
+      name: string;
+      type: string | null;
+    }
+
+    export interface IInput extends IBaseVariable {}
+
+    export interface IOutput extends IBaseVariable {}
+
+    export interface IConf {
+      name: string;
+      assignation: string;
+    }
+
+    export interface IParam extends IBaseVariable {
+      default_value?: string;
+    }
+
+    export interface ISecret extends IBaseVariable {}
+
+    export interface ICell extends BaseAssets.IBaseAsset {
+      container_image: string;
+      base_container_image?: IBaseImage;
+      dependencies: Array<IDependency>;
+      inputs: Array<IInput>;
+      outputs: Array<IOutput>;
+      confs: Array<IConf>;
+      params: Array<IParam>;
+      secrets: Array<ISecret>;
+      kernel?: string;
+      source_url?: string;
+    }
+  }
+}

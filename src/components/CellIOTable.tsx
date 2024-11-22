@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { NaaVRECatalogue } from '../naavre-common/types';
+
 import {
   FormControl,
   IconButton,
@@ -16,21 +18,19 @@ import CloseIcon from '@material-ui/icons/Close';
 
 interface ICellIOTable {
   title: string;
-  ioItems: [];
-  nodeId: string;
-  getType: (v: string) => string | null;
+  ioItems: Array<NaaVRECatalogue.WorkflowCells.IBaseVariable>;
   updateType: (
     event: React.ChangeEvent<{ name?: string; value: unknown }>,
-    port: string
+    port: NaaVRECatalogue.WorkflowCells.IBaseVariable
   ) => Promise<void>;
-  removeEntry: (v: string) => void;
+  removeEntry: (
+    v: NaaVRECatalogue.WorkflowCells.IBaseVariable
+  ) => Promise<void>;
 }
 
 export const CellIOTable: React.FC<ICellIOTable> = ({
   title,
   ioItems,
-  nodeId,
-  getType,
   updateType,
   removeEntry
 }) => {
@@ -40,62 +40,64 @@ export const CellIOTable: React.FC<ICellIOTable> = ({
       <TableContainer component={Paper} className={'lw-panel-table'}>
         <Table aria-label="simple table">
           <TableBody>
-            {ioItems.map((ioItem: string) => (
-              <TableRow key={nodeId + '-' + ioItem}>
-                <TableCell
-                  component="th"
-                  scope="row"
-                  style={{
-                    width: '70%',
-                    maxWidth: '150px',
-                    overflow: 'hidden'
-                  }}
-                >
-                  <p style={{ fontSize: '1em' }}>{ioItem}</p>
-                </TableCell>
-                <TableCell
-                  component="th"
-                  scope="row"
-                  style={{
-                    width: '15%'
-                  }}
-                >
-                  <FormControl fullWidth>
-                    <Select
-                      labelId="io-types-select-label"
-                      id={nodeId + '-' + ioItem + '-select'}
-                      label="Type"
-                      value={getType(ioItem) === null ? '' : getType(ioItem)}
-                      error={getType(ioItem) === null}
-                      onChange={event => {
-                        updateType(event, ioItem);
-                      }}
-                    >
-                      <MenuItem value={'int'}>Integer</MenuItem>
-                      <MenuItem value={'float'}>Float</MenuItem>
-                      <MenuItem value={'str'}>String</MenuItem>
-                      <MenuItem value={'list'}>List</MenuItem>
-                    </Select>
-                  </FormControl>
-                </TableCell>
-                <TableCell
-                  component="th"
-                  scope="row"
-                  style={{
-                    width: '15%',
-                    paddingLeft: '0',
-                    paddingRight: '0'
-                  }}
-                >
-                  <IconButton
-                    aria-label="delete"
-                    onClick={() => removeEntry(ioItem)}
+            {ioItems.map(
+              (ioItem: NaaVRECatalogue.WorkflowCells.IBaseVariable) => (
+                <TableRow key={ioItem.name}>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    style={{
+                      width: '70%',
+                      maxWidth: '150px',
+                      overflow: 'hidden'
+                    }}
                   >
-                    <CloseIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
+                    <p style={{ fontSize: '1em' }}>{ioItem.name}</p>
+                  </TableCell>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    style={{
+                      width: '15%'
+                    }}
+                  >
+                    <FormControl fullWidth>
+                      <Select
+                        labelId="io-types-select-label"
+                        id={ioItem.name + '-select'}
+                        label="Type"
+                        value={ioItem.type || ''}
+                        error={ioItem.type === null}
+                        onChange={event => {
+                          updateType(event, ioItem);
+                        }}
+                      >
+                        <MenuItem value={'int'}>Integer</MenuItem>
+                        <MenuItem value={'float'}>Float</MenuItem>
+                        <MenuItem value={'str'}>String</MenuItem>
+                        <MenuItem value={'list'}>List</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </TableCell>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    style={{
+                      width: '15%',
+                      paddingLeft: '0',
+                      paddingRight: '0'
+                    }}
+                  >
+                    <IconButton
+                      aria-label="delete"
+                      onClick={() => removeEntry(ioItem)}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              )
+            )}
           </TableBody>
         </Table>
       </TableContainer>

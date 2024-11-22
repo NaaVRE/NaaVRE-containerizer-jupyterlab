@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { NaaVREExternalService } from '../naavre-common/mockHandler';
-import { CellPreview } from '../naavre-common/CellPreview';
-import { VRECell } from '../naavre-common/types';
+import { NaaVREExternalService } from '../naavre-common/handler';
+import { CellPreview, cellsToChartNode } from '../naavre-common/CellPreview';
+import { NaaVRECatalogue } from '../naavre-common/types';
 import { INotebookModel, Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { Dialog, ReactWidget, showDialog } from '@jupyterlab/apputils';
 import { Cell } from '@jupyterlab/cells';
@@ -23,34 +23,23 @@ interface IProps {
   settings: IVREPanelSettings;
 }
 
-const DefaultCell: VRECell = {
+const DefaultCell: NaaVRECatalogue.WorkflowCells.ICell = {
   title: '',
-  task_name: '',
-  original_source: '',
+  description: '',
+  container_image: '',
   inputs: [],
   outputs: [],
   params: [],
-  param_values: {},
   secrets: [],
-  confs: {},
-  dependencies: [],
-  types: {},
-  chart_obj: emptyChart,
-  node_id: '',
-  container_source: '',
-  global_conf: {},
-  base_image: null,
-  image_version: '',
-  kernel: '',
-  notebook_dict: {}
+  confs: [],
+  dependencies: []
 };
 
 interface IState {
   baseImageSelected: boolean;
   baseImages: any[];
   cellAnalyzed: boolean;
-  currentCell: VRECell;
-  currentCellIndex: number;
+  currentCell: NaaVRECatalogue.WorkflowCells.ICell;
   extractorError: string;
   isDialogOpen: boolean;
   loading: boolean;
@@ -62,7 +51,6 @@ const DefaultState: IState = {
   baseImages: [],
   cellAnalyzed: false,
   currentCell: DefaultCell,
-  currentCellIndex: -1,
   extractorError: '',
   isDialogOpen: false,
   loading: false,
@@ -83,6 +71,12 @@ export class CellTracker extends React.Component<IProps, IState> {
       'GET',
       `${this.props.settings.containerizerServiceUrl}/base-image-tags`
     )
+      .then(resp => {
+        if (resp.status_code !== 200) {
+          throw `${resp.status_code} ${resp.reason}`;
+        }
+        return JSON.parse(resp.content);
+      })
       .then(data => {
         const updatedBaseImages = Object.entries(data).map(([name, image]) => ({
           name,
@@ -93,6 +87,7 @@ export class CellTracker extends React.Component<IProps, IState> {
         this.setState({ baseImages: updatedBaseImages });
       })
       .catch(reason => {
+        console.log(`Could not retrieve base image tags: ${reason}`);
         console.log(reason);
       });
   };
@@ -111,7 +106,6 @@ export class CellTracker extends React.Component<IProps, IState> {
     _activeCell
   ) => {
     this.resetState();
-    this.setState({ currentCellIndex: notebook.activeCellIndex });
   };
 
   connectAndInitWhenReady = (notebook: NotebookPanel) => {
@@ -125,6 +119,12 @@ export class CellTracker extends React.Component<IProps, IState> {
   };
 
   componentDidMount = async () => {
+    this.setState({
+      currentCell: {
+        ...this.state.currentCell,
+        virtual_lab: this.props.settings.virtualLab || undefined
+      }
+    });
     await this.loadBaseImages();
     if (this.props.notebook) {
       this.connectAndInitWhenReady(this.props.notebook);
@@ -156,28 +156,21 @@ export class CellTracker extends React.Component<IProps, IState> {
     return (await kernelObject!.info).implementation;
   };
 
-  getVarType = (var_name: string): string | null => {
-    if (
-      this.state.currentCell !== null &&
-      var_name in this.state.currentCell.types
-    ) {
-      return this.state.currentCell.types[var_name];
-    } else {
-      return null;
-    }
-  };
-
-  getTypeSelections = (cell: VRECell): { [type: string]: boolean } => {
+  getTypeSelections = (
+    cell: NaaVRECatalogue.WorkflowCells.ICell
+  ): { [type: string]: boolean } => {
     const typeSelections: { [type: string]: boolean } = {};
     [cell.inputs, cell.outputs, cell.params, cell.secrets].forEach(varList => {
-      varList.forEach((varName: string) => {
-        typeSelections[varName] = cell.types[varName] !== null;
-      });
+      varList.forEach(v => (typeSelections[v.name] = v.type !== null));
     });
     return typeSelections;
   };
 
-  extractCell = async (notebookModel: INotebookModel | null, save = false) => {
+  extractCell = async (
+    notebookModel: INotebookModel | null,
+    cellIndex: number,
+    save = false
+  ) => {
     if (notebookModel === null) {
       return null;
     }
@@ -189,17 +182,44 @@ export class CellTracker extends React.Component<IProps, IState> {
 
     NaaVREExternalService(
       'POST',
-      `${this.props.settings.containerizerServiceUrl}/extract`,
+      `${this.props.settings.containerizerServiceUrl}/extract_cell`,
       {},
       {
-        save: save,
-        kernel,
-        cell_index: this.state.currentCellIndex,
-        notebook: notebookModel.toJSON()
+        data: {
+          save: save,
+          kernel,
+          cell_index: cellIndex,
+          notebook: notebookModel.toJSON()
+        }
       }
     )
+      .then(resp => {
+        if (resp.status_code !== 200) {
+          throw `${resp.status_code} ${resp.reason}`;
+        }
+        return JSON.parse(resp.content);
+      })
       .then(data => {
-        const extractedCell = data as VRECell;
+        const extractedCell = data as NaaVRECatalogue.WorkflowCells.ICell;
+
+        // Sort variable lists alphabetically
+        const compareFn = (
+          a: NaaVRECatalogue.WorkflowCells.IBaseVariable,
+          b: NaaVRECatalogue.WorkflowCells.IBaseVariable
+        ) => {
+          if (a.name > b.name) {
+            return 1;
+          }
+          if (a.name < b.name) {
+            return -1;
+          }
+          return 0;
+        };
+        extractedCell.inputs.sort(compareFn);
+        extractedCell.outputs.sort(compareFn);
+        extractedCell.params.sort(compareFn);
+        extractedCell.secrets.sort(compareFn);
+
         const typeSelections = this.getTypeSelections(extractedCell);
 
         this.setState({
@@ -211,7 +231,9 @@ export class CellTracker extends React.Component<IProps, IState> {
         });
 
         if (this.cellPreviewRef.current !== null) {
-          this.cellPreviewRef.current.updateChart(extractedCell['chart_obj']);
+          this.cellPreviewRef.current.updateChart(
+            cellsToChartNode([extractedCell])
+          );
         }
       })
       .catch(reason => {
@@ -224,7 +246,10 @@ export class CellTracker extends React.Component<IProps, IState> {
   };
 
   onAnalyzeCell = () => {
-    this.extractCell(this.props.notebook!.model)
+    this.extractCell(
+      this.props.notebook!.model,
+      this.props.notebook!.content.activeCellIndex
+    )
       .then(() => {})
       .catch(reason => {
         console.log('Error extracting cell', reason);
@@ -252,101 +277,52 @@ export class CellTracker extends React.Component<IProps, IState> {
       });
   };
 
-  removeInput = (input: string) => {
-    const updatedInputs = this.state.currentCell.inputs.filter(
-      (i: string) => i !== input
-    );
-    const updatedCell = {
-      ...this.state.currentCell,
-      inputs: updatedInputs
-    } as VRECell;
-    delete updatedCell.types[input];
-
-    const updatedTypeSelections = this.state.typeSelections;
-    delete updatedTypeSelections[input];
-    this.setState({
-      currentCell: updatedCell,
-      typeSelections: updatedTypeSelections
-    });
-  };
-
-  removeOutput = (output: string) => {
-    const updatedOutputs = this.state.currentCell.outputs.filter(
-      (o: string) => o !== output
-    );
-    const updatedCell = {
-      ...this.state.currentCell,
-      outputs: updatedOutputs
-    } as VRECell;
-    delete updatedCell.types[output];
-
-    const updatedTypeSelections = this.state.typeSelections;
-    delete updatedTypeSelections[output];
-    this.setState({
-      currentCell: updatedCell,
-      typeSelections: updatedTypeSelections
-    });
-  };
-
-  removeParam = (param: string) => {
-    const updatedParams = this.state.currentCell.params.filter(
-      (p: string) => p !== param
-    );
-    const updatedCell = {
-      ...this.state.currentCell,
-      params: updatedParams
-    } as VRECell;
-    delete updatedCell.types[param];
-
-    const updatedTypeSelections = this.state.typeSelections;
-    delete updatedTypeSelections[param];
-    this.setState({
-      currentCell: updatedCell,
-      typeSelections: updatedTypeSelections
-    });
-  };
-
-  removeSecret = (secret: string) => {
-    const updatedSecrets = this.state.currentCell.secrets.filter(
-      (p: string) => p !== secret
-    );
-    const updatedCell = {
-      ...this.state.currentCell,
-      secrets: updatedSecrets
-    } as VRECell;
-    delete updatedCell.types[secret];
-
-    const updatedTypeSelections = this.state.typeSelections;
-    delete updatedTypeSelections[secret];
-    this.setState({
-      currentCell: updatedCell,
-      typeSelections: updatedTypeSelections
-    });
-  };
-
-  updateType = async (
-    event: React.ChangeEvent<{ name?: string; value: unknown }>,
-    port: string
+  removeVariable = async (
+    variable: NaaVRECatalogue.WorkflowCells.IBaseVariable,
+    variableCategory: 'inputs' | 'outputs' | 'params' | 'secrets'
   ) => {
-    const currTypeSelections = this.state.typeSelections;
-    currTypeSelections[port] = true;
-    const currCurrentCell = this.state.currentCell;
-    currCurrentCell.types[port] = event.target.value
-      ? String(event.target.value)
-      : null;
+    const updatedCell = this.state.currentCell;
+    updatedCell[variableCategory] = updatedCell[variableCategory].filter(
+      (v: NaaVRECatalogue.WorkflowCells.IBaseVariable) =>
+        v.name !== variable.name
+    );
+    const updatedTypeSelection = this.state.typeSelections;
+    delete updatedTypeSelection[variable.name];
     this.setState({
-      typeSelections: currTypeSelections,
-      currentCell: currCurrentCell
+      currentCell: updatedCell,
+      typeSelections: updatedTypeSelection
+    });
+    if (this.cellPreviewRef.current !== null) {
+      this.cellPreviewRef.current.updateChart(cellsToChartNode([updatedCell]));
+    }
+  };
+
+  updateVariableType = async (
+    event: React.ChangeEvent<{ name?: string; value: unknown }>,
+    variable: NaaVRECatalogue.WorkflowCells.IBaseVariable,
+    variableCategory: 'inputs' | 'outputs' | 'params' | 'secrets'
+  ) => {
+    const updatedCell = this.state.currentCell;
+    updatedCell[variableCategory].forEach(v => {
+      if (v.name === variable.name) {
+        v.type = String(event.target.value) || null;
+      }
+    });
+    const updatedTypeSelection = this.state.typeSelections;
+    updatedTypeSelection[variable.name] = true;
+    this.setState({
+      currentCell: updatedCell,
+      typeSelections: updatedTypeSelection
     });
   };
 
   updateBaseImage = async (value: any) => {
-    const currCurrentCell = this.state.currentCell;
+    const updatedCell = this.state.currentCell;
     console.log('updateBaseImage', value);
-    currCurrentCell.base_image = value;
+    updatedCell.base_container_image = value;
     this.setState({
       baseImageSelected: true,
-      currentCell: currCurrentCell
+      currentCell: updatedCell
     });
   };
 
@@ -394,7 +370,7 @@ export class CellTracker extends React.Component<IProps, IState> {
               'Analyze cell'
             )}
           </Button>
-          {this.state.currentCell.kernel === 'IRKernel' && (
+          {this.state.currentCell.kernel?.toLowerCase() === 'irkernel' && (
             <Button
               variant="contained"
               className={'lw-panel-button'}
@@ -441,40 +417,36 @@ export class CellTracker extends React.Component<IProps, IState> {
                 <CellIOTable
                   title={'Inputs'}
                   ioItems={this.state.currentCell.inputs}
-                  nodeId={this.state.currentCell.node_id}
-                  getType={v => this.getVarType(v)}
-                  updateType={this.updateType}
-                  removeEntry={this.removeInput}
+                  updateType={(v, e) => this.updateVariableType(v, e, 'inputs')}
+                  removeEntry={v => this.removeVariable(v, 'inputs')}
                 ></CellIOTable>
               )}
               {this.state.currentCell.outputs.length > 0 && (
                 <CellIOTable
                   title={'Outputs'}
                   ioItems={this.state.currentCell.outputs}
-                  nodeId={this.state.currentCell.node_id}
-                  getType={v => this.getVarType(v)}
-                  updateType={this.updateType}
-                  removeEntry={this.removeOutput}
+                  updateType={(v, e) =>
+                    this.updateVariableType(v, e, 'outputs')
+                  }
+                  removeEntry={v => this.removeVariable(v, 'outputs')}
                 ></CellIOTable>
               )}
               {this.state.currentCell.params.length > 0 && (
                 <CellIOTable
                   title={'Parameters'}
                   ioItems={this.state.currentCell.params}
-                  nodeId={this.state.currentCell.node_id}
-                  getType={v => this.getVarType(v)}
-                  updateType={this.updateType}
-                  removeEntry={this.removeParam}
+                  updateType={(v, e) => this.updateVariableType(v, e, 'params')}
+                  removeEntry={v => this.removeVariable(v, 'params')}
                 ></CellIOTable>
               )}
               {this.state.currentCell.secrets.length > 0 && (
                 <CellIOTable
                   title={'Secrets'}
                   ioItems={this.state.currentCell.secrets}
-                  nodeId={this.state.currentCell.node_id}
-                  getType={v => this.getVarType(v)}
-                  updateType={this.updateType}
-                  removeEntry={this.removeSecret}
+                  updateType={(v, e) =>
+                    this.updateVariableType(v, e, 'secrets')
+                  }
+                  removeEntry={v => this.removeVariable(v, 'secrets')}
                 ></CellIOTable>
               )}
               {this.state.currentCell.dependencies.length > 0 && (

@@ -103,9 +103,15 @@ export class AddCellDialog extends React.Component<IAddCellDialog, IState> {
   render(): React.ReactElement {
     return (
       <ThemeProvider theme={theme}>
-        <p className="section-header">Create Cell</p>
         <CatalogBody>
-          <div className="cell-submit-box">
+          <div
+            style={{
+              padding: '10px',
+              alignItems: 'center',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
             {this.state.loading ? (
               <>
                 <CircularProgress />

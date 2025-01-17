@@ -140,7 +140,15 @@ export class CellPreview extends React.Component {
 
     return (
       <div>
-        <div className={'lw-panel-editor'}>
+        <div
+          style={{
+            margin: '10px',
+            width: '350px',
+            height: '200px',
+            overflow: 'hidden',
+            borderRadius: '5px'
+          }}
+        >
           <FlowChart
             chart={chart}
             callbacks={stateActions}

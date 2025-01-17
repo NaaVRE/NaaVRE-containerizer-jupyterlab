@@ -45,13 +45,47 @@ export const VREPanelComponent = ({
 
   return (
     <ThemeProvider theme={theme}>
-      <div className={'lifewatch-widget'}>
-        <div className={'lifewatch-widget-content'}>
+      <div
+        style={{
+          flexDirection: 'column',
+          minWidth: 'var(--jp-sidebar-min-width)',
+          color: 'var(--jp-ui-font-color1)',
+          background: 'var(--jp-layout-color1)',
+          fontSize: 'var(--jp-ui-font-size1)',
+          overflow: 'auto',
+          height: '100%',
+          display: 'flex'
+        }}
+      >
+        <div
+          style={{
+            minWidth: 'var(--jp-sidebar-min-width)',
+            overflow: 'auto'
+          }}
+        >
           <div>
-            <p className={'lw-panel-header'}>Component containerizer</p>
+            <p
+              style={{
+                fontSize: 'var(--jp-ui-font-size3)',
+                padding: '10px',
+                fontWeight: '800',
+                letterSpacing: '0.5px'
+              }}
+            >
+              Component containerizer
+            </p>
             <Divider />
             <div>
-              <p className={'lw-panel-curr-nb'}>{notebookPath}</p>
+              <p
+                style={{
+                  fontSize: 'var(--jp-ui-font-size2)',
+                  padding: '10px',
+                  color: 'cornflowerblue',
+                  fontWeight: '700'
+                }}
+              >
+                {notebookPath}
+              </p>
             </div>
             <Divider />
           </div>

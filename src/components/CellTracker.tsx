@@ -337,7 +337,7 @@ export class CellTracker extends React.Component<IProps, IState> {
 
   onContainerize = async () => {
     const AddCellDialogOptions: Partial<Dialog.IOptions<any>> = {
-      title: '',
+      title: 'Create cell',
       body: ReactWidget.create(
         <AddCellDialog
           cell={this.state.currentCell}
@@ -359,7 +359,7 @@ export class CellTracker extends React.Component<IProps, IState> {
           <CellPreview ref={this.cellPreviewRef} />
           <Button
             variant="contained"
-            className={'lw-panel-button'}
+            className={'naavre-containerizer-button'}
             onClick={this.onAnalyzeCell}
             color="primary"
             disabled={!this.state.currentCell || this.state.loading}
@@ -373,7 +373,7 @@ export class CellTracker extends React.Component<IProps, IState> {
           {this.state.currentCell.kernel?.toLowerCase() === 'irkernel' && (
             <Button
               variant="contained"
-              className={'lw-panel-button'}
+              className={'naavre-containerizer-button'}
               onClick={this.onDetectType}
               color="primary"
               disabled={
@@ -396,14 +396,14 @@ export class CellTracker extends React.Component<IProps, IState> {
             <div>
               {this.state.loading ? (
                 <div>
-                  <p className={'lw-panel-preview'}>
+                  <p className={'naavre-containerizer-preview'}>
                     <span>Analyzing notebook</span>
                     <br />
                     <span style={{ color: '#aaaaaa' }}>
                       This can take up to a minute
                     </span>
                   </p>
-                  <Box className={'lw-panel-table'} sx={{ width: '100%' }}>
+                  <Box className={'naavre-containerizer-table'} sx={{ width: '100%' }}>
                     <LinearProgress />
                   </Box>
                 </div>
@@ -456,7 +456,7 @@ export class CellTracker extends React.Component<IProps, IState> {
               )}
               {this.state.cellAnalyzed && (
                 <div>
-                  <p className={'lw-panel-preview'}>Base Image</p>
+                  <p className={'naavre-containerizer-preview'}>Base Image</p>
                   <Autocomplete
                     getOptionLabel={option => option.name}
                     options={this.state.baseImages}
@@ -470,7 +470,7 @@ export class CellTracker extends React.Component<IProps, IState> {
                   />
                   <Button
                     variant="contained"
-                    className={'lw-panel-button'}
+                    className={'naavre-containerizer-button'}
                     onClick={this.onContainerize}
                     color="primary"
                     disabled={

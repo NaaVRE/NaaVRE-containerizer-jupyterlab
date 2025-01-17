@@ -20,8 +20,8 @@ export const CellDependenciesTable: React.FC<ICellDependenciesTable> = ({
 }) => {
   return (
     <div>
-      <p className={'lw-panel-preview'}>Dependencies</p>
-      <TableContainer component={Paper} className={'lw-panel-table'}>
+      <p className={'naavre-containerizer-preview'}>Dependencies</p>
+      <TableContainer component={Paper} className={'naavre-containerizer-table'}>
         <Table aria-label="simple table">
           <TableBody>
             {items.map((dep: any) => (

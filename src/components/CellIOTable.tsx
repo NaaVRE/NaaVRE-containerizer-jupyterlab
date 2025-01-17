@@ -36,8 +36,8 @@ export const CellIOTable: React.FC<ICellIOTable> = ({
 }) => {
   return (
     <div>
-      <p className={'lw-panel-preview'}>{title}</p>
-      <TableContainer component={Paper} className={'lw-panel-table'}>
+      <p className={'naavre-containerizer-preview'}>{title}</p>
+      <TableContainer component={Paper} className={'naavre-containerizer-table'}>
         <Table aria-label="simple table">
           <TableBody>
             {ioItems.map(

@@ -403,7 +403,10 @@ export class CellTracker extends React.Component<IProps, IState> {
                       This can take up to a minute
                     </span>
                   </p>
-                  <Box className={'naavre-containerizer-table'} sx={{ width: '100%' }}>
+                  <Box
+                    className={'naavre-containerizer-table'}
+                    sx={{ width: '100%' }}
+                  >
                     <LinearProgress />
                   </Box>
                 </div>

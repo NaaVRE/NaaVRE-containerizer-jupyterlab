@@ -1,0 +1,38 @@
+name: naavre-containerizer-jl-dev
+
+services:
+  containerizer-service:
+    image: ghcr.io/naavre/naavre-containerizer-service:v0.1.1
+    ports:
+      - '127.0.0.1:41918:8000'
+    environment:
+      DEBUG: true
+      VERIFY_SSL: false
+      DISABLE_AUTH: true
+      BASE_IMAGE_TAGS_URL: https://github.com/QCDIS/NaaVRE-flavors/releases/latest/download/base_image_tags.json
+      MODULE_MAPPING_URL: https://raw.githubusercontent.com/QCDIS/NaaVRE-conf/main/module_mapping.json
+    env_file:
+      - containerizer-secrets.env
+
+  catalogue-service:
+    image: ghcr.io/naavre/naavre-catalogue-service:v0.1.1
+    ports:
+      - '127.0.0.1:19036:8000'
+    environment:
+      DEV_MODE: true
+      VERIFY_SSL: false
+      DISABLE_AUTH: true
+      DJANGO_SUPERUSER_USERNAME: admin
+      DJANGO_SUPERUSER_PASSWORD: admin
+      DJANGO_SUPERUSER_EMAIL: example@example.org
+      DB_HOST: catalogue-db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres-password
+      DB_NAME: postgres
+      OIDC_CONFIGURATION_URL: https://naavre-dev.minikube.test/auth/realms/vre/.well-known/openid-configuration
+
+  catalogue-db:
+    image: postgres:17
+    environment:
+      POSTGRES_PASSWORD: postgres-password

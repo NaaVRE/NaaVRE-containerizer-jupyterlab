@@ -130,3 +130,6 @@ dmypy.json
 
 # package manager lock files
 package-lock.json
+
+# Dev resources
+dev/containerizer-secrets.env

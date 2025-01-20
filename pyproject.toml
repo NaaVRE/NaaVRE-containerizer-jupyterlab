@@ -23,7 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "NaaVRE-communicator-jupyterlab==0.2.0"
+    "NaaVRE-communicator-jupyterlab==0.2.1"
 ]
 dynamic = ["version", "description", "authors", "urls", "keywords"]
 

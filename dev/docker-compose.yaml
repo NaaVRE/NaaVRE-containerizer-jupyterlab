@@ -4,7 +4,7 @@ services:
   containerizer-service:
     image: ghcr.io/naavre/naavre-containerizer-service:v0.1.1
     ports:
-      - "127.0.0.1:41918:8000"
+      - '127.0.0.1:41918:8000'
     environment:
       DEBUG: true
       VERIFY_SSL: false
@@ -17,7 +17,7 @@ services:
   catalogue-service:
     image: ghcr.io/naavre/naavre-catalogue-service:v0.1.1
     ports:
-      - "127.0.0.1:19036:8000"
+      - '127.0.0.1:19036:8000'
     environment:
       DEV_MODE: true
       VERIFY_SSL: false

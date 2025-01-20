@@ -53,7 +53,7 @@ jlpm build
 
 This extension communicates with external NaaVRE services. During development, you can run a local version of those services with Docker compose. Initial setup:
 
-1. Create a file [./dev/containerizer-secrets.env](./dev/containerizer-secrets.env) and add values for `CELL_GITHUB`, `CELL_GITHUB_TOKEN`, `AUTH_TOKEN`, and `OIDC_CONFIGURATION_URL`. To obtain values for `CELL_GITHUB` and `CELL_GITHUB_TOKEN`, create your own cells repository from the [NaaVRE-cells](https://github.com/QCDIS/NaaVRE-cells) template, and follow instructions from the readme. `OIDC_CONFIGURATION_URL` won’t be needed in the future (after [NaaVRE-containerizer-service#19](https://github.com/NaaVRE/NaaVRE-containerizer-service/pull/19) is included in a release).
+1. Create a file `./dev/containerizer-secrets.env` and add values for `CELL_GITHUB`, `CELL_GITHUB_TOKEN`, `AUTH_TOKEN`, and `OIDC_CONFIGURATION_URL`. To obtain values for `CELL_GITHUB` and `CELL_GITHUB_TOKEN`, create your own cells repository from the [NaaVRE-cells](https://github.com/QCDIS/NaaVRE-cells) template, and follow instructions from the readme. `OIDC_CONFIGURATION_URL` won’t be needed in the future (after [NaaVRE-containerizer-service#19](https://github.com/NaaVRE/NaaVRE-containerizer-service/pull/19) is included in a release).
 2. Copy the Jupyter Lab configuration
    ```bash
    mkdir venv/share/jupyter/lab/settings/

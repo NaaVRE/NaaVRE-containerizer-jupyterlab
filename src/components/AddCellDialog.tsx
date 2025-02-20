@@ -52,6 +52,7 @@ export class AddCellDialog extends React.Component<IAddCellDialog, IState> {
       `${this.props.settings.containerizerServiceUrl}/containerize`,
       {},
       {
+        virtual_lab: this.props.settings.virtualLab || undefined,
         cell: this.props.cell
       }
     )

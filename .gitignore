@@ -132,4 +132,4 @@ dmypy.json
 package-lock.json
 
 # Dev resources
-dev/containerizer-secrets.env
+dev/containerizer-config.json

@@ -69,7 +69,7 @@ export class CellTracker extends React.Component<IProps, IState> {
   loadBaseImages = async () => {
     NaaVREExternalService(
       'GET',
-      `${this.props.settings.containerizerServiceUrl}/base-image-tags`
+      `${this.props.settings.containerizerServiceUrl}/base-image-tags?virtual_lab=${this.props.settings.virtualLab}`
     )
       .then(resp => {
         if (resp.status_code !== 200) {
@@ -185,6 +185,7 @@ export class CellTracker extends React.Component<IProps, IState> {
       `${this.props.settings.containerizerServiceUrl}/extract_cell`,
       {},
       {
+        virtual_lab: this.props.settings.virtualLab || undefined,
         data: {
           save: save,
           kernel,

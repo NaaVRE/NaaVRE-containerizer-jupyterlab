@@ -23,8 +23,9 @@ interface IAddCellDialog {
 declare type CellContainerizationWorkflow = {
   workflow_id: string;
   dispatched_github_workflow: boolean;
-  image_version: string;
+  container_image: string;
   workflow_url: string;
+  source_url: string;
 };
 
 interface IState {
@@ -60,10 +61,11 @@ export class AddCellDialog extends React.Component<IAddCellDialog, IState> {
         if (resp.status_code !== 200) {
           throw `${resp.status_code} ${resp.reason}`;
         }
-        return JSON.parse(resp.content);
-      })
-      .then(data => {
-        this.setState({ cellWorkflow: data });
+        const cellWorkflow: CellContainerizationWorkflow = JSON.parse(
+          resp.content
+        );
+        this.setState({ cellWorkflow: cellWorkflow });
+        return cellWorkflow;
       })
       .catch(reason => {
         const msg = `Could not containerize cell: ${reason}`;
@@ -71,10 +73,10 @@ export class AddCellDialog extends React.Component<IAddCellDialog, IState> {
         console.log(reason);
         this.setState({ error: msg });
       })
-      .then(() => {
-        // Add missing fields
-        this.props.cell.container_image = 'FIXME-dummy-container-image:latest'; // FIXME: this needs to come from the backend
-        this.props.cell.source_url = ''; // FIXME: this needs to come from the backend
+      .then(cellWorkflow => {
+        this.props.cell.container_image = cellWorkflow?.container_image || '';
+        this.props.cell.source_url = cellWorkflow?.source_url || '';
+        this.props.cell.description = this.props.cell.title;
         this.props.cell.virtual_lab =
           this.props.settings.virtualLab || undefined;
 

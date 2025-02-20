@@ -68,6 +68,11 @@ export async function NaaVREExternalService(
 
   const resp: INaaVREExternalServiceResponse = await requestAPI(endPoint, init);
 
-  console.log(resp);
+  console.debug('resp', resp);
+  try {
+    console.debug('resp.content', JSON.parse(resp.content));
+  } catch {
+    /* empty */
+  }
   return resp;
 }

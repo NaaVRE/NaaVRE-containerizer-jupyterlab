@@ -346,7 +346,9 @@ export class CellTracker extends React.Component<IProps, IState> {
           settings={this.props.settings}
         />
       ) as Dialog.IBodyWidget<any>,
-      buttons: this.state.loading ? [] : [Dialog.okButton({ label: 'Close' })]
+      buttons: this.state.loading
+        ? []
+        : [Dialog.okButton({ label: 'Continue in the background' })]
     };
     showDialog(AddCellDialogOptions).then(() => {
       this.setState({ loading: false });

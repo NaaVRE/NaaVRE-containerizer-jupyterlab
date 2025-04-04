@@ -3,20 +3,19 @@ import { NaaVREExternalService } from '../naavre-common/handler';
 import { CellPreview, cellsToChartNode } from '../naavre-common/CellPreview';
 import { NaaVRECatalogue } from '../naavre-common/types';
 import { INotebookModel, Notebook, NotebookPanel } from '@jupyterlab/notebook';
-import { Dialog, ReactWidget, showDialog } from '@jupyterlab/apputils';
 import { Cell } from '@jupyterlab/cells';
 import { theme } from '../Theme';
 import TableContainer from '@material-ui/core/TableContainer';
 import { Button, TextField, ThemeProvider } from '@material-ui/core';
 import { Alert, Autocomplete, Box, LinearProgress } from '@mui/material';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { AddCellDialog } from './AddCellDialog';
 import { emptyChart } from '../naavre-common/emptyChart';
 import { Slot } from '@lumino/signaling';
 import { IVREPanelSettings } from '../VREPanel';
 import { CellIOTable } from './CellIOTable';
 import { CellDependenciesTable } from './CellDependenciesTable';
 import { detectType } from '../services/rTypes';
+import { createCell } from './CellCreation';
 
 interface IProps {
   notebook: NotebookPanel | null;
@@ -337,22 +336,7 @@ export class CellTracker extends React.Component<IProps, IState> {
   };
 
   onContainerize = async () => {
-    const AddCellDialogOptions: Partial<Dialog.IOptions<any>> = {
-      title: 'Create cell',
-      body: ReactWidget.create(
-        <AddCellDialog
-          cell={this.state.currentCell}
-          closeDialog={() => this.setState({ isDialogOpen: false })}
-          settings={this.props.settings}
-        />
-      ) as Dialog.IBodyWidget<any>,
-      buttons: this.state.loading
-        ? []
-        : [Dialog.okButton({ label: 'Continue in the background' })]
-    };
-    showDialog(AddCellDialogOptions).then(() => {
-      this.setState({ loading: false });
-    });
+    await createCell(this.state.currentCell, this.props.settings);
   };
 
   render() {

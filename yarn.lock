@@ -3531,7 +3531,7 @@ __metadata:
     color-hash: ^2.0.2
     css-loader: ^6.7.1
     eslint: ^8.36.0
-    eslint-config-prettier: ^8.8.0
+    eslint-config-prettier: ^10.1.1
     eslint-plugin-prettier: ^5.0.0
     jest: ^29.2.0
     js-sha1: ^0.7.0
@@ -5883,14 +5883,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-prettier@npm:^8.8.0":
-  version: 8.10.0
-  resolution: "eslint-config-prettier@npm:8.10.0"
+"eslint-config-prettier@npm:^10.1.1":
+  version: 10.1.1
+  resolution: "eslint-config-prettier@npm:10.1.1"
   peerDependencies:
     eslint: ">=7.0.0"
   bin:
     eslint-config-prettier: bin/cli.js
-  checksum: 153266badd477e49b0759816246b2132f1dbdb6c7f313ca60a9af5822fd1071c2bc5684a3720d78b725452bbac04bb130878b2513aea5e72b1b792de5a69fec8
+  checksum: 1211a973f4b5c3fe4a152ca58e40493c9d51b5145a4dfd6a4606b65e480b43c072d1a9b41b179adeb3aac93b6425b2d05d5e4f696e2447ac833373b4ac707a6b
   languageName: node
   linkType: hard
 

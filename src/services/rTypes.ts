@@ -1,4 +1,5 @@
 import { NotebookPanel } from '@jupyterlab/notebook';
+import { KernelMessage } from '@jupyterlab/services';
 import { NaaVRECatalogue } from '../naavre-common/types';
 import { Cell } from '@jupyterlab/cells';
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
@@ -56,15 +57,13 @@ export const detectType = async ({
     return new Promise((resolve, reject) => {
       future.onIOPub = msg => {
         if (msg.header.msg_type === 'execute_result') {
-          console.log('Execution Result:', msg.content);
+          const m = msg as KernelMessage.IExecuteResultMsg;
+          console.log('Execution Result:', m.content);
         } else if (msg.header.msg_type === 'display_data') {
-          console.log('Display Data:', msg.content);
+          const m = msg as KernelMessage.IDisplayDataMsg;
+          console.log('Display Data:', m.content);
 
-          let typeString = (
-            'data' in msg.content
-              ? msg.content.data['text/html']
-              : 'No data found'
-          ) as string;
+          let typeString = m.content.data['text/html'] as string;
           typeString = typeString.replace(/['"]/g, '');
           const varName = vars[0];
 
@@ -88,12 +87,7 @@ export const detectType = async ({
           const output = {
             output_type: 'display_data',
             data: {
-              'text/plain':
-                vars[0] +
-                ': ' +
-                ('data' in msg.content
-                  ? msg.content.data['text/html']
-                  : 'No data found')
+              'text/plain': vars[0] + ': ' + m.content.data['text/html']
             },
             metadata: {}
           };
@@ -101,18 +95,20 @@ export const detectType = async ({
           codeCell.model.outputs.add(output);
           vars.shift();
         } else if (msg.header.msg_type === 'stream') {
-          console.log('Stream:', msg);
+          const m = msg as KernelMessage.IStreamMsg;
+          console.log('Stream:', m);
         } else if (msg.header.msg_type === 'error') {
+          const m = msg as KernelMessage.IErrorMsg;
           const output = {
             output_type: 'display_data',
             data: {
               'text/plain':
-                'evalue' in msg.content ? msg.content.evalue : 'No data found'
+                'evalue' in m.content ? m.content.evalue : 'No data found'
             },
             metadata: {}
           };
           codeCell.model.outputs.add(output);
-          console.error('Error:', msg.content);
+          console.error('Error:', m.content);
         }
       };
 

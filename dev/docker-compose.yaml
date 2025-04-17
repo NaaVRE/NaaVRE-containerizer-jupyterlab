@@ -2,11 +2,10 @@ name: naavre-containerizer-jl-dev
 
 services:
   containerizer-service:
-    image: ghcr.io/naavre/naavre-containerizer-service:v0.2
+    image: ghcr.io/naavre/naavre-containerizer-service:v0.3.3
     ports:
       - '127.0.0.1:41918:8000'
     environment:
-      DEBUG: true
       VERIFY_SSL: false
       DISABLE_AUTH: true
       CONFIG_FILE_URL: "/configuration.json"
@@ -14,7 +13,7 @@ services:
       - ./containerizer-config.json:/configuration.json
 
   catalogue-service:
-    image: ghcr.io/naavre/naavre-catalogue-service:v0.1.1
+    image: ghcr.io/naavre/naavre-catalogue-service:v0.1.6
     ports:
       - '127.0.0.1:19036:8000'
     environment:

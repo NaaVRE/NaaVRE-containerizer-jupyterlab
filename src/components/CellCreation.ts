@@ -53,7 +53,7 @@ async function findCellInCatalogue({
 
   const resp = await NaaVREExternalService(
     'GET',
-    `${settings.catalogueServiceUrl}/workflow-cells/?title=${cell.title}`
+    `${settings.catalogueServiceUrl}/workflow-cells/?title=${cell.title}&virtual_lab=${settings.virtualLab}`
   );
   if (resp.status_code !== 200) {
     throw `${resp.status_code} ${resp.reason}`;

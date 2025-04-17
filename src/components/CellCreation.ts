@@ -13,6 +13,13 @@ declare type ContainerizeResponse = {
   source_url: string;
 };
 
+declare type CatalogueResponse = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: { url: string }[];
+};
+
 async function addCellToGitHub({
   cell,
   settings
@@ -35,6 +42,25 @@ async function addCellToGitHub({
   return JSON.parse(resp.content) as ContainerizeResponse;
 }
 
+async function findCellInCatalogue({
+  cell,
+  settings
+}: {
+  cell: NaaVRECatalogue.WorkflowCells.ICell;
+  settings: IVREPanelSettings;
+}): Promise<CatalogueResponse> {
+  cell.virtual_lab = settings.virtualLab || undefined;
+
+  const resp = await NaaVREExternalService(
+    'GET',
+    `${settings.catalogueServiceUrl}/workflow-cells/?title=${cell.title}&virtual_lab=${settings.virtualLab}`
+  );
+  if (resp.status_code !== 200) {
+    throw `${resp.status_code} ${resp.reason}`;
+  }
+  return JSON.parse(resp.content);
+}
+
 async function addCellToCatalogue({
   cell,
   containerizeResponse,
@@ -43,7 +69,7 @@ async function addCellToCatalogue({
   cell: NaaVRECatalogue.WorkflowCells.ICell;
   containerizeResponse: ContainerizeResponse;
   settings: IVREPanelSettings;
-}): Promise<ReadonlyJSONValue> {
+}): Promise<CatalogueResponse> {
   cell.container_image = containerizeResponse?.container_image || '';
   cell.source_url = containerizeResponse?.source_url || '';
   cell.description = cell.title;
@@ -59,6 +85,57 @@ async function addCellToCatalogue({
     throw `${resp.status_code} ${resp.reason}`;
   }
   return JSON.parse(resp.content);
+}
+
+async function updateCellInCatalogue({
+  cellUrl,
+  cell,
+  containerizeResponse,
+  settings
+}: {
+  cellUrl: string;
+  cell: NaaVRECatalogue.WorkflowCells.ICell;
+  containerizeResponse: ContainerizeResponse;
+  settings: IVREPanelSettings;
+}): Promise<CatalogueResponse> {
+  cell.container_image = containerizeResponse?.container_image || '';
+  cell.source_url = containerizeResponse?.source_url || '';
+  cell.description = cell.title;
+  cell.virtual_lab = settings.virtualLab || undefined;
+
+  const resp = await NaaVREExternalService('PUT', cellUrl, {}, cell);
+  if (resp.status_code !== 200) {
+    throw `${resp.status_code} ${resp.reason}`;
+  }
+  return JSON.parse(resp.content);
+}
+
+async function addOrUpdateCellInCatalogue({
+  cell,
+  containerizeResponse,
+  settings
+}: {
+  cell: NaaVRECatalogue.WorkflowCells.ICell;
+  containerizeResponse: ContainerizeResponse;
+  settings: IVREPanelSettings;
+}): Promise<'added' | 'updated'> {
+  const res = await findCellInCatalogue({ cell, settings });
+  if (res.count === 0) {
+    await addCellToCatalogue({
+      cell,
+      containerizeResponse: containerizeResponse,
+      settings
+    });
+    return 'added';
+  } else {
+    await updateCellInCatalogue({
+      cellUrl: res.results[0].url,
+      cell,
+      containerizeResponse: containerizeResponse,
+      settings
+    });
+    return 'updated';
+  }
 }
 
 async function actionNotification<Props, Res extends ReadonlyJSONValue>(
@@ -114,6 +191,14 @@ export async function createCell(
       error: `Failed to create cell ${cell.title}`
     }
   );
+  if (!res.dispatched_github_workflow) {
+    Notification.update({
+      id: id,
+      message:
+        'The cell already exists, nothing to do. To rebuild the cell, update its title or content'
+    });
+    return;
+  }
   Notification.update({
     id: id,
     actions: [
@@ -128,7 +213,7 @@ export async function createCell(
   });
   await actionNotification(
     { cell: cell, containerizeResponse: res, settings: settings },
-    addCellToCatalogue,
+    addOrUpdateCellInCatalogue,
     {
       pending: `Adding cell ${cell.title} to the catalogue`,
       success: `Added cell ${cell.title} to the catalogue`,

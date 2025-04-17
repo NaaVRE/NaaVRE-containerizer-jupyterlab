@@ -114,6 +114,14 @@ export async function createCell(
       error: `Failed to create cell ${cell.title}`
     }
   );
+  if (!res.dispatched_github_workflow) {
+    Notification.update({
+      id: id,
+      message:
+        'The cell already exists, nothing to do. To rebuild the cell, update its title or content'
+    });
+    return;
+  }
   Notification.update({
     id: id,
     actions: [

@@ -2,15 +2,13 @@ import * as React from 'react';
 import { NaaVREExternalService } from '../naavre-common/handler';
 import { CellPreview, cellsToChartNode } from '../naavre-common/CellPreview';
 import { NaaVRECatalogue } from '../naavre-common/types';
-import { INotebookModel, Notebook, NotebookPanel } from '@jupyterlab/notebook';
-import { Cell } from '@jupyterlab/cells';
+import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 import { theme } from '../Theme';
 import TableContainer from '@material-ui/core/TableContainer';
 import { Button, TextField, ThemeProvider } from '@material-ui/core';
 import { Alert, Autocomplete, Box, LinearProgress } from '@mui/material';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { emptyChart } from '../naavre-common/emptyChart';
-import { Slot } from '@lumino/signaling';
 import { IVREPanelSettings } from '../VREPanel';
 import { CellIOTable } from './CellIOTable';
 import { CellDependenciesTable } from './CellDependenciesTable';
@@ -100,18 +98,12 @@ export class CellTracker extends React.Component<IProps, IState> {
     }
   };
 
-  onActiveCellChanged: Slot<Notebook, Cell | null> = async (
-    notebook,
-    _activeCell
-  ) => {
-    this.resetState();
-  };
-
   connectAndInitWhenReady = (notebook: NotebookPanel) => {
     notebook.context.ready.then(() => {
       if (this.props.notebook !== null) {
-        this.props.notebook.content.activeCellChanged.connect(
-          this.onActiveCellChanged
+        this.props.notebook.content.activeCellChanged.connect(this.resetState);
+        this.props.notebook.content.modelContentChanged.connect(
+          this.resetState
         );
       }
     });
@@ -140,7 +132,10 @@ export class CellTracker extends React.Component<IProps, IState> {
     if (preNotebookId !== notebookId) {
       if (prevProps.notebook) {
         prevProps.notebook.content.activeCellChanged.disconnect(
-          this.onActiveCellChanged
+          this.resetState
+        );
+        prevProps.notebook.content.modelContentChanged.disconnect(
+          this.resetState
         );
       }
       if (this.props.notebook) {

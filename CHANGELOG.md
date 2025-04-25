@@ -2,6 +2,28 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.3.3
+
+([Full Changelog](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/compare/v0.3.2...d4d46ae254a261dc40c348e2c9d17f18dc81634a))
+
+### Enhancements made
+
+- Reset tracker panel when cell content changes [#33](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/33) ([@gpelouze](https://github.com/gpelouze))
+- add delay to mitigate NaaVRE/NaaVRE#29 [#32](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/32) ([@gpelouze](https://github.com/gpelouze))
+
+### Maintenance and upkeep improvements
+
+- Bump @babel/runtime from 7.26.0 to 7.27.0 [#35](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/35) ([@dependabot](https://github.com/dependabot))
+- Bump nanoid from 3.3.7 to 3.3.11 [#34](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/34) ([@dependabot](https://github.com/dependabot))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/graphs/contributors?from=2025-04-17&to=2025-04-25&type=c))
+
+[@dependabot](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Adependabot+updated%3A2025-04-17..2025-04-25&type=Issues) | [@gpelouze](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Agpelouze+updated%3A2025-04-17..2025-04-25&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.3.2
 
 ([Full Changelog](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/compare/v0.3.1...673fab983231c2fcd3b1d80cc74d98385ac2ba91))
@@ -15,8 +37,6 @@
 ([GitHub contributors page for this release](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/graphs/contributors?from=2025-04-10&to=2025-04-17&type=c))
 
 [@gpelouze](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Agpelouze+updated%3A2025-04-10..2025-04-17&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.3.1
 

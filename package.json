@@ -1,6 +1,6 @@
 {
     "name": "@naavre/containerizer-jupyterlab",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "description": "NaaVRE cells containerizer frontend on Jupyter Lab",
     "keywords": [
         "jupyter",

@@ -1,5 +1,6 @@
 import { Notification } from '@jupyterlab/apputils';
 import { PromiseDelegate, ReadonlyJSONValue } from '@lumino/coreutils';
+import pRetry from 'p-retry';
 
 import { NaaVRECatalogue } from '../naavre-common/types';
 import { NaaVREExternalService } from '../naavre-common/handler';
@@ -20,12 +21,14 @@ declare type CatalogueResponse = {
   results: { url: string }[];
 };
 
-async function addCellToGitHub({
+async function callContainerizeAPI({
   cell,
-  settings
+  settings,
+  force_containerize
 }: {
   cell: NaaVRECatalogue.WorkflowCells.ICell;
   settings: IVREPanelSettings;
+  force_containerize: boolean;
 }) {
   const resp = await NaaVREExternalService(
     'POST',
@@ -33,13 +36,37 @@ async function addCellToGitHub({
     {},
     {
       virtual_lab: settings.virtualLab || undefined,
-      cell: cell
+      cell: cell,
+      force_containerize: force_containerize
     }
   );
   if (resp.status_code !== 200) {
     throw `${resp.status_code} ${resp.reason}`;
   }
   return JSON.parse(resp.content) as ContainerizeResponse;
+}
+
+async function addCellToGitHub({
+  cell,
+  settings
+}: {
+  cell: NaaVRECatalogue.WorkflowCells.ICell;
+  settings: IVREPanelSettings;
+}) {
+  return pRetry(
+    (attemptCount: number) => {
+      return callContainerizeAPI({
+        cell,
+        settings,
+        force_containerize: attemptCount !== 1
+      });
+    },
+    {
+      retries: 2,
+      minTimeout: 1000,
+      factor: 2
+    }
+  );
 }
 
 async function findCellInCatalogue({

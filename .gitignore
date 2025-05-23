@@ -133,3 +133,6 @@ package-lock.json
 
 # Dev resources
 dev/containerizer-config.json
+
+# Notebook directory for Jupyter Lab in dev mode
+notebook-dir/

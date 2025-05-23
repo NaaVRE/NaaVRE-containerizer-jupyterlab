@@ -5,8 +5,20 @@ import { NaaVRECatalogue } from '../naavre-common/types';
 import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 import { theme } from '../Theme';
 import TableContainer from '@material-ui/core/TableContainer';
-import { Button, TextField, ThemeProvider } from '@material-ui/core';
-import { Alert, Autocomplete, Box, LinearProgress } from '@mui/material';
+import {
+  Button,
+  FormControlLabel,
+  TextField,
+  ThemeProvider,
+  Tooltip
+} from '@material-ui/core';
+import {
+  Alert,
+  Autocomplete,
+  Box,
+  Checkbox,
+  LinearProgress
+} from '@mui/material';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { emptyChart } from '../naavre-common/emptyChart';
 import { IVREPanelSettings } from '../VREPanel';
@@ -41,6 +53,7 @@ interface IState {
   isDialogOpen: boolean;
   loading: boolean;
   typeSelections: { [type: string]: boolean };
+  forceContainerize: boolean;
 }
 
 const DefaultState: IState = {
@@ -51,7 +64,8 @@ const DefaultState: IState = {
   extractorError: '',
   isDialogOpen: false,
   loading: false,
-  typeSelections: {}
+  typeSelections: {},
+  forceContainerize: false
 };
 
 export class CellTracker extends React.Component<IProps, IState> {
@@ -334,7 +348,11 @@ export class CellTracker extends React.Component<IProps, IState> {
   };
 
   onContainerize = async () => {
-    await createCell(this.state.currentCell, this.props.settings);
+    await createCell(
+      this.state.currentCell,
+      this.props.settings,
+      this.state.forceContainerize
+    );
   };
 
   render() {
@@ -456,6 +474,22 @@ export class CellTracker extends React.Component<IProps, IState> {
                     sx={{ width: 330, margin: '20px' }}
                     renderInput={params => <TextField {...params} />}
                   />
+                  <Tooltip title="Build the container image, even if the cell hasn't changed and the image already exists">
+                    <FormControlLabel
+                      label="Force recontainerization"
+                      control={
+                        <Checkbox
+                          checked={this.state.forceContainerize}
+                          onChange={event => {
+                            this.setState({
+                              forceContainerize: event.target.checked
+                            });
+                          }}
+                        />
+                      }
+                      style={{ margin: '0.5rem' }}
+                    />
+                  </Tooltip>
                   <Button
                     variant="contained"
                     className={'naavre-containerizer-button'}
@@ -466,6 +500,9 @@ export class CellTracker extends React.Component<IProps, IState> {
                       !this.state.baseImageSelected ||
                       this.state.loading
                     }
+                    style={{
+                      float: 'right'
+                    }}
                   >
                     Containerize
                   </Button>

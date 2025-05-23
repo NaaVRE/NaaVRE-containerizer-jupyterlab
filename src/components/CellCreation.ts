@@ -24,11 +24,11 @@ declare type CatalogueResponse = {
 async function callContainerizeAPI({
   cell,
   settings,
-  force_containerize
+  forceContainerize
 }: {
   cell: NaaVRECatalogue.WorkflowCells.ICell;
   settings: IVREPanelSettings;
-  force_containerize: boolean;
+  forceContainerize: boolean;
 }) {
   const resp = await NaaVREExternalService(
     'POST',
@@ -37,7 +37,7 @@ async function callContainerizeAPI({
     {
       virtual_lab: settings.virtualLab || undefined,
       cell: cell,
-      force_containerize: force_containerize
+      force_containerize: forceContainerize
     }
   );
   if (resp.status_code !== 200) {
@@ -48,17 +48,19 @@ async function callContainerizeAPI({
 
 async function addCellToGitHub({
   cell,
-  settings
+  settings,
+  forceContainerize
 }: {
   cell: NaaVRECatalogue.WorkflowCells.ICell;
   settings: IVREPanelSettings;
+  forceContainerize: boolean;
 }) {
   return pRetry(
     (attemptCount: number) => {
       return callContainerizeAPI({
         cell,
         settings,
-        force_containerize: attemptCount !== 1
+        forceContainerize: forceContainerize || attemptCount !== 1
       });
     },
     {
@@ -207,10 +209,11 @@ async function actionNotification<Props, Res extends ReadonlyJSONValue>(
 
 export async function createCell(
   cell: NaaVRECatalogue.WorkflowCells.ICell,
-  settings: IVREPanelSettings
+  settings: IVREPanelSettings,
+  forceContainerize: boolean
 ) {
   const { res, id } = await actionNotification(
-    { cell: cell, settings: settings },
+    { cell: cell, settings: settings, forceContainerize: forceContainerize },
     addCellToGitHub,
     {
       pending: `Creating cell ${cell.title}`,

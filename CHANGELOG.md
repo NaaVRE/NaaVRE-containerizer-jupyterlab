@@ -2,6 +2,30 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.3.4
+
+([Full Changelog](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/compare/v0.3.3...6c70880426c2438feade9aae2f10e095453a942c))
+
+### Enhancements made
+
+- Retry containerization when the API does not respond [#42](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/42) ([@gpelouze](https://github.com/gpelouze))
+
+### Maintenance and upkeep improvements
+
+- Bump the mui group with 2 updates [#44](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/44) ([@dependabot](https://github.com/dependabot))
+- Bump the jupyterlab group with 5 updates [#43](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/43) ([@dependabot](https://github.com/dependabot))
+- Bump stylelint-prettier from 4.1.0 to 5.0.3 [#38](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/38) ([@dependabot](https://github.com/dependabot))
+- Bump the mui group with 2 updates [#37](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/37) ([@dependabot](https://github.com/dependabot))
+- Bump the jupyterlab group with 5 updates [#36](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/36) ([@dependabot](https://github.com/dependabot))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/graphs/contributors?from=2025-04-25&to=2025-06-09&type=c))
+
+[@dependabot](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Adependabot+updated%3A2025-04-25..2025-06-09&type=Issues) | [@gpelouze](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Agpelouze+updated%3A2025-04-25..2025-06-09&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.3.3
 
 ([Full Changelog](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/compare/v0.3.2...d4d46ae254a261dc40c348e2c9d17f18dc81634a))
@@ -21,8 +45,6 @@
 ([GitHub contributors page for this release](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/graphs/contributors?from=2025-04-17&to=2025-04-25&type=c))
 
 [@dependabot](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Adependabot+updated%3A2025-04-17..2025-04-25&type=Issues) | [@gpelouze](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Agpelouze+updated%3A2025-04-17..2025-04-25&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.3.2
 

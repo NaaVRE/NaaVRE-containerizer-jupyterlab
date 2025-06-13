@@ -1,6 +1,5 @@
 import { Notification } from '@jupyterlab/apputils';
-import { PromiseDelegate, ReadonlyJSONValue } from '@lumino/coreutils';
-import pRetry from 'p-retry';
+import pRetry, { AbortError } from 'p-retry';
 
 import { NaaVRECatalogue } from '../naavre-common/types';
 import { NaaVREExternalService } from '../naavre-common/handler';
@@ -14,6 +13,28 @@ declare type ContainerizeResponse = {
   source_url: string;
 };
 
+declare type StatusResponse = {
+  job: {
+    html_url: string;
+    status:
+      | 'queued'
+      | 'in_progress'
+      | 'completed'
+      | 'waiting'
+      | 'requested'
+      | 'pending';
+    conclusion:
+      | 'success'
+      | 'failure'
+      | 'neutral'
+      | 'cancelled'
+      | 'skipped'
+      | 'timed_out'
+      | 'action_required'
+      | null;
+  };
+} | null;
+
 declare type CatalogueResponse = {
   count: number;
   next: string | null;
@@ -21,15 +42,11 @@ declare type CatalogueResponse = {
   results: { url: string }[];
 };
 
-async function callContainerizeAPI({
-  cell,
-  settings,
-  forceContainerize
-}: {
-  cell: NaaVRECatalogue.WorkflowCells.ICell;
-  settings: IVREPanelSettings;
-  forceContainerize: boolean;
-}) {
+async function callContainerizeAPI(
+  cell: NaaVRECatalogue.WorkflowCells.ICell,
+  forceContainerize: boolean,
+  settings: IVREPanelSettings
+) {
   const resp = await NaaVREExternalService(
     'POST',
     `${settings.containerizerServiceUrl}/containerize`,
@@ -46,29 +63,20 @@ async function callContainerizeAPI({
   return JSON.parse(resp.content) as ContainerizeResponse;
 }
 
-async function addCellToGitHub({
-  cell,
-  settings,
-  forceContainerize
-}: {
-  cell: NaaVRECatalogue.WorkflowCells.ICell;
-  settings: IVREPanelSettings;
-  forceContainerize: boolean;
-}) {
-  return pRetry(
-    (attemptCount: number) => {
-      return callContainerizeAPI({
-        cell,
-        settings,
-        forceContainerize: forceContainerize || attemptCount !== 1
-      });
-    },
-    {
-      retries: 2,
-      minTimeout: 1000,
-      factor: 2
-    }
+async function callStatusAPI(workflowId: string, settings: IVREPanelSettings) {
+  const resp = await NaaVREExternalService(
+    'GET',
+    `${settings.containerizerServiceUrl}/status/${settings.virtualLab}/${workflowId}/`,
+    {},
+    {}
   );
+  if (resp.status_code === 200) {
+    return JSON.parse(resp.content) as StatusResponse;
+  } else if (resp.status_code === 404) {
+    return null;
+  } else {
+    throw `${resp.status_code} ${resp.reason}`;
+  }
 }
 
 async function findCellInCatalogue({
@@ -139,15 +147,11 @@ async function updateCellInCatalogue({
   return JSON.parse(resp.content);
 }
 
-async function addOrUpdateCellInCatalogue({
-  cell,
-  containerizeResponse,
-  settings
-}: {
-  cell: NaaVRECatalogue.WorkflowCells.ICell;
-  containerizeResponse: ContainerizeResponse;
-  settings: IVREPanelSettings;
-}): Promise<'added' | 'updated'> {
+async function addOrUpdateCellInCatalogue(
+  cell: NaaVRECatalogue.WorkflowCells.ICell,
+  containerizeResponse: ContainerizeResponse,
+  settings: IVREPanelSettings
+): Promise<'added' | 'updated'> {
   const res = await findCellInCatalogue({ cell, settings });
   if (res.count === 0) {
     await addCellToCatalogue({
@@ -167,87 +171,173 @@ async function addOrUpdateCellInCatalogue({
   }
 }
 
-async function actionNotification<Props, Res extends ReadonlyJSONValue>(
-  props: Props,
-  action: (props: Props) => Promise<Res>,
-  messages: {
-    pending: string;
-    success: string;
-    error: string;
-  }
-) {
-  const delegate = new PromiseDelegate<Res>();
-  action(props)
-    .then(res => delegate.resolve(res))
-    .catch(err => delegate.reject(err));
-  const id = Notification.promise<Res>(delegate.promise, {
-    pending: {
-      message: messages.pending,
-      options: { autoClose: false }
-    },
-    // Message when the task finished successfully
-    success: {
-      message: result => {
-        return messages.success;
-      },
-      options: { autoClose: 5000 }
-    },
-    // Message when the task finished with errors
-    error: {
-      message: reason => {
-        if (typeof reason === 'string') {
-          return `${messages.error} (${reason as string})`;
-        } else {
-          return messages.error;
-        }
-      }
-    }
-  });
-  const res = await delegate.promise;
-  return { res: res, id: id };
-}
-
 export async function createCell(
   cell: NaaVRECatalogue.WorkflowCells.ICell,
   settings: IVREPanelSettings,
   forceContainerize: boolean
 ) {
-  const { res, id } = await actionNotification(
-    { cell: cell, settings: settings, forceContainerize: forceContainerize },
-    addCellToGitHub,
-    {
-      pending: `Creating cell ${cell.title}`,
-      success: `Created cell ${cell.title}`,
-      error: `Failed to create cell ${cell.title}`
-    }
+  const notificationId = Notification.emit(
+    `Containerizing ${cell.title}: submitting cell`,
+    'in-progress',
+    { autoClose: false }
   );
-  if (!res.dispatched_github_workflow) {
+  let containerizeResponse: ContainerizeResponse;
+  try {
+    containerizeResponse = await callContainerizeAPI(
+      cell,
+      forceContainerize,
+      settings
+    );
+    console.debug('containerizeResponse', containerizeResponse);
+  } catch {
     Notification.update({
-      id: id,
-      message:
-        'The cell already exists, nothing to do. To rebuild the cell, update its title or content'
+      id: notificationId,
+      type: 'error',
+      message: `Failed to containerize ${cell.title}: cannot submit cell`,
+      autoClose: 5000
     });
     return;
   }
+  if (!containerizeResponse.dispatched_github_workflow) {
+    Notification.update({
+      id: notificationId,
+      type: 'warning',
+      message: `Cell ${cell.title} is already containerized`,
+      autoClose: 5000
+    });
+    return;
+  }
+
+  await new Promise(r => setTimeout(r, 5000));
+
   Notification.update({
-    id: id,
+    id: notificationId,
+    message: `Containerizing ${cell.title}: starting build job`
+  });
+  let statusResponse: StatusResponse;
+  try {
+    statusResponse = await pRetry(
+      async () => {
+        const res = await callStatusAPI(
+          containerizeResponse.workflow_id,
+          settings
+        );
+        console.debug(res);
+        if (res === null) {
+          throw Error('job not found');
+        }
+        return res;
+      },
+      {
+        retries: 3,
+        factor: 2,
+        minTimeout: 3000
+      }
+    );
+    console.debug('statusResponse', statusResponse);
+  } catch {
+    Notification.update({
+      id: notificationId,
+      type: 'error',
+      message: `Failed to containerize ${cell.title}: could not start build job`,
+      autoClose: 5000
+    });
+    return;
+  }
+
+  Notification.update({
+    id: notificationId,
+    message: `Containerizing ${cell.title}: building image (this can take up to several minutes)`,
     actions: [
       {
-        label: 'Containerization status',
+        label: 'See progress on GitHub',
         callback: event => {
           event.preventDefault();
-          window.open(res.workflow_url);
+          window.open(statusResponse?.job.html_url);
         }
       }
     ]
   });
-  await actionNotification(
-    { cell: cell, containerizeResponse: res, settings: settings },
-    addOrUpdateCellInCatalogue,
-    {
-      pending: `Adding cell ${cell.title} to the catalogue`,
-      success: `Added cell ${cell.title} to the catalogue`,
-      error: `Failed to add cell ${cell.title} to the catalogue`
-    }
-  );
+  try {
+    statusResponse = await pRetry(
+      async () => {
+        const res = await callStatusAPI(
+          containerizeResponse.workflow_id,
+          settings
+        );
+        if (res === null) {
+          throw Error('job not found');
+        }
+        console.debug(res.job);
+        if (res.job.status !== 'completed') {
+          throw Error('job not complete');
+        }
+        if (
+          res.job.conclusion === null ||
+          [
+            'action_required',
+            'cancelled',
+            'failure',
+            'stale',
+            'timed_out'
+          ].includes(res.job.conclusion)
+        ) {
+          throw new AbortError('job was not successful');
+        }
+        return res;
+      },
+      {
+        retries: 60,
+        factor: 1,
+        minTimeout: 10000
+      }
+    );
+    console.debug('statusResponse', statusResponse);
+  } catch {
+    Notification.update({
+      id: notificationId,
+      type: 'error',
+      message: `Failed to containerize ${cell.title}: could not run build job`,
+      actions: [
+        {
+          label: 'See status on GitHub',
+          callback: event => {
+            event.preventDefault();
+            window.open(statusResponse?.job.html_url);
+          }
+        }
+      ],
+      autoClose: 5000
+    });
+    return;
+  }
+
+  Notification.update({
+    id: notificationId,
+    message: `Containerizing ${cell.title}: saving to the catalogue`,
+    actions: []
+  });
+  try {
+    const catalogueResponse = await addOrUpdateCellInCatalogue(
+      cell,
+      containerizeResponse,
+      settings
+    );
+    console.debug('catalogueResponse', catalogueResponse);
+  } catch {
+    Notification.update({
+      id: notificationId,
+      type: 'error',
+      message: `Failed to containerize ${cell.title}: save to the catalogue`,
+      autoClose: 5000
+    });
+    return;
+  }
+
+  Notification.update({
+    id: notificationId,
+    type: 'success',
+    message: `Containerized ${cell.title}`,
+    autoClose: 5000
+  });
 }

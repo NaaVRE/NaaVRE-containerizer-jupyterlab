@@ -188,8 +188,6 @@ export class CellTracker extends React.Component<IProps, IState> {
       extractorError: ''
     });
 
-    const timeout = new Promise(resolve => setTimeout(resolve, 5000));
-
     NaaVREExternalService(
       'POST',
       `${this.props.settings.containerizerServiceUrl}/extract_cell`,
@@ -253,7 +251,6 @@ export class CellTracker extends React.Component<IProps, IState> {
         });
       });
 
-    await timeout;
     this.setState({ loading: false });
   };
 

@@ -232,6 +232,7 @@ export class CellTracker extends React.Component<IProps, IState> {
         const typeSelections = this.getTypeSelections(extractedCell);
 
         this.setState({
+          loading: false,
           cellAnalyzed: true,
           extractorError: '',
           currentCell: extractedCell,
@@ -247,11 +248,10 @@ export class CellTracker extends React.Component<IProps, IState> {
       .catch(reason => {
         console.log(reason);
         this.setState({
+          loading: false,
           extractorError: String(reason)
         });
       });
-
-    this.setState({ loading: false });
   };
 
   onAnalyzeCell = () => {

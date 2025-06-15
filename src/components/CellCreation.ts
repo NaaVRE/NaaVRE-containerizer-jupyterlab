@@ -229,7 +229,7 @@ export async function createCell(
         return res;
       },
       {
-        retries: 3,
+        retries: 5,
         factor: 2,
         minTimeout: 3000
       }
@@ -287,9 +287,9 @@ export async function createCell(
         return res;
       },
       {
-        retries: 60,
+        retries: 180,
         factor: 1,
-        minTimeout: 10000
+        minTimeout: 20000
       }
     );
     console.debug('statusResponse', statusResponse);

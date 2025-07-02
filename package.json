@@ -59,7 +59,7 @@
     "packageManager": "yarn@3.5.0",
     "dependencies": {
         "@emotion/react": "11.14.0",
-        "@emotion/styled": "11.14.0",
+        "@emotion/styled": "11.14.1",
         "@jupyterlab/application": "^4.0.0",
         "@jupyterlab/services": "^7.4.0",
         "@jupyterlab/settingregistry": "^4.0.0",

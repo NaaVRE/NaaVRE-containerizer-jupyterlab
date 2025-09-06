@@ -35,6 +35,8 @@ interface IProps {
 const DefaultCell: NaaVRECatalogue.WorkflowCells.ICell = {
   title: '',
   description: '',
+  version: 1,
+  next_version: null,
   container_image: '',
   inputs: [],
   outputs: [],

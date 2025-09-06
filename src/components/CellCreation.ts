@@ -35,11 +35,15 @@ declare type StatusResponse = {
   };
 } | null;
 
+declare type CatalogueResponseItem = {
+  url: string;
+} & NaaVRECatalogue.WorkflowCells.ICell;
+
 declare type CatalogueResponse = {
   count: number;
   next: string | null;
   previous: string | null;
-  results: { url: string }[];
+  results: CatalogueResponseItem[];
 };
 
 async function callContainerizeAPI(
@@ -80,22 +84,46 @@ async function callStatusAPI(workflowId: string, settings: IVREPanelSettings) {
 }
 
 async function findCellInCatalogue({
-  cell,
+  searchParams,
   settings
 }: {
-  cell: NaaVRECatalogue.WorkflowCells.ICell;
+  searchParams: URLSearchParams;
   settings: IVREPanelSettings;
 }): Promise<CatalogueResponse> {
-  cell.virtual_lab = settings.virtualLab || undefined;
-
   const resp = await NaaVREExternalService(
     'GET',
-    `${settings.catalogueServiceUrl}/workflow-cells/?title=${cell.title}&virtual_lab=${settings.virtualLab}`
+    `${settings.catalogueServiceUrl}/workflow-cells/?${searchParams}`
   );
   if (resp.status_code !== 200) {
     throw `${resp.status_code} ${resp.reason}`;
   }
   return JSON.parse(resp.content);
+}
+
+async function getLatestCellVersionFromCatalogue({
+  cell,
+  settings
+}: {
+  cell: NaaVRECatalogue.WorkflowCells.ICell;
+  settings: IVREPanelSettings;
+}): Promise<CatalogueResponseItem | null> {
+  cell.virtual_lab = settings.virtualLab || undefined;
+  if (settings.virtualLab === null) {
+    throw 'Virtual lab is null, check @naavre/containerizer-jupyterlab settings';
+  }
+  const res = await findCellInCatalogue({
+    searchParams: new URLSearchParams({
+      title: cell.title,
+      virtual_lab: settings.virtualLab
+    }),
+    settings
+  });
+  if (res.count === 0) {
+    return null;
+  }
+  return res.results.reduce((max, item) =>
+    item.version > max.version ? item : max
+  );
 }
 
 async function addCellToCatalogue({
@@ -106,7 +134,7 @@ async function addCellToCatalogue({
   cell: NaaVRECatalogue.WorkflowCells.ICell;
   containerizeResponse: ContainerizeResponse;
   settings: IVREPanelSettings;
-}): Promise<CatalogueResponse> {
+}): Promise<CatalogueResponseItem> {
   cell.container_image = containerizeResponse?.container_image || '';
   cell.source_url = containerizeResponse?.source_url || '';
   cell.description = cell.title;
@@ -124,50 +152,43 @@ async function addCellToCatalogue({
   return JSON.parse(resp.content);
 }
 
-async function updateCellInCatalogue({
+async function patchCellInCatalogue({
   cellUrl,
-  cell,
-  containerizeResponse,
-  settings
+  payload
 }: {
   cellUrl: string;
-  cell: NaaVRECatalogue.WorkflowCells.ICell;
-  containerizeResponse: ContainerizeResponse;
-  settings: IVREPanelSettings;
-}): Promise<CatalogueResponse> {
-  cell.container_image = containerizeResponse?.container_image || '';
-  cell.source_url = containerizeResponse?.source_url || '';
-  cell.description = cell.title;
-  cell.virtual_lab = settings.virtualLab || undefined;
-
-  const resp = await NaaVREExternalService('PUT', cellUrl, {}, cell);
+  payload: object;
+}): Promise<CatalogueResponseItem> {
+  const resp = await NaaVREExternalService('PATCH', cellUrl, {}, payload);
   if (resp.status_code !== 200) {
     throw `${resp.status_code} ${resp.reason}`;
   }
   return JSON.parse(resp.content);
 }
 
-async function addOrUpdateCellInCatalogue(
+async function addCellToCatalogueAndLinkPreviousVersion(
   cell: NaaVRECatalogue.WorkflowCells.ICell,
   containerizeResponse: ContainerizeResponse,
   settings: IVREPanelSettings
 ): Promise<'added' | 'updated'> {
-  const res = await findCellInCatalogue({ cell, settings });
-  if (res.count === 0) {
-    await addCellToCatalogue({
-      cell,
-      containerizeResponse: containerizeResponse,
-      settings
-    });
-    return 'added';
-  } else {
-    await updateCellInCatalogue({
-      cellUrl: res.results[0].url,
-      cell,
-      containerizeResponse: containerizeResponse,
-      settings
+  const previousCell = await getLatestCellVersionFromCatalogue({
+    cell: cell,
+    settings: settings
+  });
+  cell.version = previousCell !== null ? previousCell.version + 1 : 1;
+  const newCell = await addCellToCatalogue({
+    cell,
+    containerizeResponse: containerizeResponse,
+    settings
+  });
+  if (previousCell !== null) {
+    await patchCellInCatalogue({
+      cellUrl: previousCell.url,
+      payload: { next_version: newCell.url }
     });
     return 'updated';
+  } else {
+    return 'added';
   }
 }
 
@@ -318,7 +339,7 @@ export async function createCell(
     actions: []
   });
   try {
-    const catalogueResponse = await addOrUpdateCellInCatalogue(
+    const catalogueResponse = await addCellToCatalogueAndLinkPreviousVersion(
       cell,
       containerizeResponse,
       settings

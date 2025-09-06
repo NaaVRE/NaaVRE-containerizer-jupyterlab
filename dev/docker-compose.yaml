@@ -13,7 +13,7 @@ services:
       - ./containerizer-config.json:/configuration.json
 
   catalogue-service:
-    image: ghcr.io/naavre/naavre-catalogue-service:v0.1.6
+    image: ghcr.io/naavre/naavre-catalogue-service:v0.4.0-alpha.1
     ports:
       - '127.0.0.1:19036:8000'
     environment:

@@ -43,6 +43,8 @@ export namespace NaaVRECatalogue {
     export interface ISecret extends IBaseVariable {}
 
     export interface ICell extends BaseAssets.IBaseAsset {
+      version: number;
+      next_version: ICell | null;
       container_image: string;
       base_container_image?: IBaseImage;
       dependencies: Array<IDependency>;

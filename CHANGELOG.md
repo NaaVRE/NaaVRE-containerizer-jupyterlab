@@ -2,6 +2,22 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.4.1
+
+([Full Changelog](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/compare/v0.4.0...8834ba75f3ed968d73617bc0797899c13e4d1894))
+
+### Bugs fixed
+
+- Loosen dependency requirements [#66](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/66) ([@gpelouze](https://github.com/gpelouze))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/graphs/contributors?from=2025-09-23&to=2025-09-23&type=c))
+
+[@gpelouze](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Agpelouze+updated%3A2025-09-23..2025-09-23&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.4.0
 
 ([Full Changelog](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/compare/v0.3.6...73e38d59992375d8ea30b6efe7bb2baa32f2f353))
@@ -27,8 +43,6 @@
 ([GitHub contributors page for this release](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/graphs/contributors?from=2025-06-15&to=2025-09-23&type=c))
 
 [@dependabot](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Adependabot+updated%3A2025-06-15..2025-09-23&type=Issues) | [@gpelouze](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Agpelouze+updated%3A2025-06-15..2025-09-23&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.3.6
 

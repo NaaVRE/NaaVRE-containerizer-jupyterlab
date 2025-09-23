@@ -2,6 +2,34 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.4.0
+
+([Full Changelog](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/compare/v0.3.6...73e38d59992375d8ea30b6efe7bb2baa32f2f353))
+
+### Enhancements made
+
+- Set cell version during containerization [#65](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/65) ([@gpelouze](https://github.com/gpelouze))
+
+### Maintenance and upkeep improvements
+
+- Bump styled-components from 6.1.12 to 6.1.19 [#62](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/62) ([@dependabot](https://github.com/dependabot))
+- Bump source-map-loader from 1.1.3 to 5.0.0 [#61](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/61) ([@dependabot](https://github.com/dependabot))
+- Bump yjs from 13.6.24 to 13.6.27 [#60](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/60) ([@dependabot](https://github.com/dependabot))
+- Bump the jupyterlab group with 5 updates [#58](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/58) ([@dependabot](https://github.com/dependabot))
+- Bump typescript from 5.0.4 to 5.8.3 [#57](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/57) ([@dependabot](https://github.com/dependabot))
+- Bump @material-ui/icons from 4.11.2 to 4.11.3 [#56](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/56) ([@dependabot](https://github.com/dependabot))
+- Bump the mui group with 2 updates [#55](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/55) ([@dependabot](https://github.com/dependabot))
+- Bump the jupyterlab group with 5 updates [#54](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/54) ([@dependabot](https://github.com/dependabot))
+- Bump @emotion/styled from 11.14.0 to 11.14.1 in the emotion group [#53](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/53) ([@dependabot](https://github.com/dependabot))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/graphs/contributors?from=2025-06-15&to=2025-09-23&type=c))
+
+[@dependabot](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Adependabot+updated%3A2025-06-15..2025-09-23&type=Issues) | [@gpelouze](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Agpelouze+updated%3A2025-06-15..2025-09-23&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.3.6
 
 ([Full Changelog](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/compare/v0.3.5...d5bdde6f6001d700c40b89cbf5a2af5e3f68058e))
@@ -16,8 +44,6 @@
 ([GitHub contributors page for this release](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/graphs/contributors?from=2025-06-13&to=2025-06-15&type=c))
 
 [@gpelouze](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Agpelouze+updated%3A2025-06-13..2025-06-15&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.3.5
 

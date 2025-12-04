@@ -3668,7 +3668,7 @@ __metadata:
     rimraf: ^5.0.1
     sort-keys-recursive: ^2.1.10
     source-map-loader: ^5.0.0
-    style-loader: ^3.3.1
+    style-loader: ^4.0.0
     styled-components: 6.1.19
     stylelint: ^15.10.1
     stylelint-config-recommended: ^13.0.0
@@ -10431,7 +10431,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"style-loader@npm:^3.3.1, style-loader@npm:~3.3.1":
+"style-loader@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "style-loader@npm:4.0.0"
+  peerDependencies:
+    webpack: ^5.27.0
+  checksum: 0b751b4cc8394a2fe1df6194bb2f6dd68e859e36f22030994bb7b5220f24f9efb5705e78b2442226e6fa4c90f74b397529c7eb0a1d7326fb016e1e140e90151c
+  languageName: node
+  linkType: hard
+
+"style-loader@npm:~3.3.1":
   version: 3.3.4
   resolution: "style-loader@npm:3.3.4"
   peerDependencies:

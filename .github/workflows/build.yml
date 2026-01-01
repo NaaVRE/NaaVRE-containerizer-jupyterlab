@@ -53,7 +53,7 @@ jobs:
         pip uninstall -y "NaaVRE_containerizer_jupyterlab" jupyterlab
 
     - name: Upload extension packages
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: extension-artifacts
         path: dist/naavre_containerizer_jupyterlab*
@@ -136,7 +136,7 @@ jobs:
 
     - name: Upload Playwright Test report
       if: always()
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: NaaVRE_containerizer_jupyterlab-playwright-tests
         path: |

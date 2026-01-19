@@ -57,6 +57,7 @@ interface IState {
   loading: boolean;
   typeSelections: { [type: string]: boolean };
   forceContainerize: boolean;
+  createDraft: boolean;
 }
 
 const DefaultState: IState = {
@@ -68,7 +69,8 @@ const DefaultState: IState = {
   isDialogOpen: false,
   loading: false,
   typeSelections: {},
-  forceContainerize: false
+  forceContainerize: false,
+  createDraft: false
 };
 
 export class CellTracker extends React.Component<IProps, IState> {
@@ -78,6 +80,7 @@ export class CellTracker extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.cellPreviewRef = React.createRef();
+    this.state.createDraft = this.props.settings.isDraftDefault || false;
   }
 
   loadBaseImages = async () => {
@@ -351,7 +354,8 @@ export class CellTracker extends React.Component<IProps, IState> {
     await createCell(
       this.state.currentCell,
       this.props.settings,
-      this.state.forceContainerize
+      this.state.forceContainerize,
+      this.state.createDraft
     );
   };
 
@@ -491,21 +495,38 @@ export class CellTracker extends React.Component<IProps, IState> {
                       renderInput={params => <TextField {...params} />}
                     />
                   </div>
-                  <Tooltip title="Build the container image, even if the cell hasn't changed and the image already exists">
-                    <FormControlLabel
-                      label="Force recontainerization"
-                      control={
-                        <Checkbox
-                          checked={this.state.forceContainerize}
-                          onChange={event => {
-                            this.setState({
-                              forceContainerize: event.target.checked
-                            });
-                          }}
-                        />
-                      }
-                    />
-                  </Tooltip>
+                  <Stack direction="column" spacing={0}>
+                    <Tooltip title="Build the container image, even if the cell hasn't changed and the image already exists">
+                      <FormControlLabel
+                        label="Force recontainerization"
+                        control={
+                          <Checkbox
+                            checked={this.state.forceContainerize}
+                            onChange={event => {
+                              this.setState({
+                                forceContainerize: event.target.checked
+                              });
+                            }}
+                          />
+                        }
+                      />
+                    </Tooltip>
+                    <Tooltip title="Add to the catalogue without building the image">
+                      <FormControlLabel
+                        label="Draft"
+                        control={
+                          <Checkbox
+                            checked={this.state.createDraft}
+                            onChange={event => {
+                              this.setState({
+                                createDraft: event.target.checked
+                              });
+                            }}
+                          />
+                        }
+                      />
+                    </Tooltip>
+                  </Stack>
                   <Stack
                     direction="row"
                     sx={{
@@ -518,11 +539,13 @@ export class CellTracker extends React.Component<IProps, IState> {
                       color="primary"
                       disabled={
                         !this.allTypesSelected() ||
-                        !this.state.baseImageSelected ||
+                        !(
+                          this.state.createDraft || this.state.baseImageSelected
+                        ) ||
                         this.state.loading
                       }
                     >
-                      Containerize
+                      {this.state.createDraft ? 'Create' : 'Containerize'}
                     </Button>
                   </Stack>
                 </>

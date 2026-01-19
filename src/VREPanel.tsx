@@ -8,12 +8,14 @@ import { Divider } from '@material-ui/core';
 
 export interface IVREPanelSettings {
   virtualLab: string | null;
+  isDraftDefault: boolean | null;
   containerizerServiceUrl: string | null;
   catalogueServiceUrl: string | null;
 }
 
 export const DefaultVREPanelSettings: IVREPanelSettings = {
   virtualLab: null,
+  isDraftDefault: null,
   containerizerServiceUrl: null,
   catalogueServiceUrl: null
 };

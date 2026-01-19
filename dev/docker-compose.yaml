@@ -2,7 +2,7 @@ name: naavre-containerizer-jl-dev
 
 services:
   containerizer-service:
-    image: ghcr.io/naavre/naavre-containerizer-service:v0.4
+    image: ghcr.io/naavre/naavre-containerizer-service:v0.4.6
     ports:
       - '127.0.0.1:41918:8000'
     environment:
@@ -13,7 +13,7 @@ services:
       - ./containerizer-config.json:/configuration.json
 
   catalogue-service:
-    image: ghcr.io/naavre/naavre-catalogue-service:v0.4.0-alpha.1
+    image: ghcr.io/naavre/naavre-catalogue-service:v0.5.2
     ports:
       - '127.0.0.1:19036:8000'
     environment:

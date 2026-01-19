@@ -46,7 +46,7 @@ export function cellToChartNode(
   return {
     id: cellIdentityHash(cell).substring(0, 7),
     type: 'input-output',
-    position: { x: 35, y: 15 },
+    position: { x: 40, y: 20 },
     properties: {
       title: cell.title,
       params: cell.params.map(v => v.name),
@@ -142,9 +142,8 @@ export class CellPreview extends React.Component {
       <div>
         <div
           style={{
-            margin: '10px',
-            width: '350px',
-            height: '200px',
+            height: '190px',
+            width: '330px',
             overflow: 'hidden',
             borderRadius: '5px'
           }}

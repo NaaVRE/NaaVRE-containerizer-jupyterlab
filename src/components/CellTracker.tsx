@@ -17,7 +17,8 @@ import {
   Autocomplete,
   Box,
   Checkbox,
-  LinearProgress
+  LinearProgress,
+  Stack
 } from '@mui/material';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { emptyChart } from '../naavre-common/emptyChart';
@@ -357,35 +358,54 @@ export class CellTracker extends React.Component<IProps, IState> {
   render() {
     return (
       <ThemeProvider theme={theme}>
-        <div>
-          <CellPreview ref={this.cellPreviewRef} />
-          <Button
-            variant="contained"
-            className={'naavre-containerizer-button'}
-            onClick={this.onAnalyzeCell}
-            color="primary"
-            disabled={!this.state.currentCell || this.state.loading}
+        <Stack sx={{ margin: '20px', minWidth: '330px' }} spacing={1}>
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: 'center'
+            }}
           >
-            {this.state.loading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              'Analyze cell'
-            )}
-          </Button>
-          {this.state.currentCell.kernel?.toLowerCase() === 'irkernel' && (
+            <CellPreview ref={this.cellPreviewRef} />
+          </Stack>
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: 'flex-end'
+            }}
+          >
             <Button
               variant="contained"
-              className={'naavre-containerizer-button'}
-              onClick={this.onDetectType}
+              onClick={this.onAnalyzeCell}
               color="primary"
-              disabled={
-                !this.state.currentCell ||
-                this.state.loading ||
-                this.allTypesSelected()
-              }
+              disabled={!this.state.currentCell || this.state.loading}
             >
-              Detect types
+              {this.state.loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                'Analyze cell'
+              )}
             </Button>
+          </Stack>
+          {this.state.currentCell.kernel?.toLowerCase() === 'irkernel' && (
+            <Stack
+              direction="row"
+              sx={{
+                justifyContent: 'flex-end'
+              }}
+            >
+              <Button
+                variant="contained"
+                onClick={this.onDetectType}
+                color="primary"
+                disabled={
+                  !this.state.currentCell ||
+                  this.state.loading ||
+                  this.allTypesSelected()
+                }
+              >
+                Detect types
+              </Button>
+            </Stack>
           )}
           {this.state.extractorError && (
             <div>
@@ -395,29 +415,26 @@ export class CellTracker extends React.Component<IProps, IState> {
             </div>
           )}
           {this.state.loading ? (
-            <div>
+            <>
               {this.state.loading ? (
-                <div>
-                  <p className={'naavre-containerizer-preview'}>
+                <>
+                  <p>
                     <span>Analyzing notebook</span>
                     <br />
                     <span style={{ color: '#aaaaaa' }}>
                       This can take up to a minute
                     </span>
                   </p>
-                  <Box
-                    className={'naavre-containerizer-table'}
-                    sx={{ width: '100%' }}
-                  >
+                  <Box>
                     <LinearProgress />
                   </Box>
-                </div>
+                </>
               ) : (
                 <TableContainer></TableContainer>
               )}
-            </div>
+            </>
           ) : (
-            <div>
+            <>
               {this.state.currentCell.inputs.length > 0 && (
                 <CellIOTable
                   title={'Inputs'}
@@ -460,19 +477,20 @@ export class CellTracker extends React.Component<IProps, IState> {
                 ></CellDependenciesTable>
               )}
               {this.state.cellAnalyzed && (
-                <div>
-                  <p className={'naavre-containerizer-preview'}>Base Image</p>
-                  <Autocomplete
-                    getOptionLabel={option => option.name}
-                    options={this.state.baseImages}
-                    disablePortal
-                    onChange={(_event: any, newValue: any | null) => {
-                      this.updateBaseImage(newValue.image);
-                    }}
-                    id="combo-box-demo"
-                    sx={{ width: 330, margin: '20px' }}
-                    renderInput={params => <TextField {...params} />}
-                  />
+                <>
+                  <div>
+                    <p>Base Image</p>
+                    <Autocomplete
+                      getOptionLabel={option => option.name}
+                      options={this.state.baseImages}
+                      disablePortal
+                      onChange={(_event: any, newValue: any | null) => {
+                        this.updateBaseImage(newValue.image);
+                      }}
+                      id="combo-box-demo"
+                      renderInput={params => <TextField {...params} />}
+                    />
+                  </div>
                   <Tooltip title="Build the container image, even if the cell hasn't changed and the image already exists">
                     <FormControlLabel
                       label="Force recontainerization"
@@ -486,30 +504,32 @@ export class CellTracker extends React.Component<IProps, IState> {
                           }}
                         />
                       }
-                      style={{ margin: '0.5rem' }}
                     />
                   </Tooltip>
-                  <Button
-                    variant="contained"
-                    className={'naavre-containerizer-button'}
-                    onClick={this.onContainerize}
-                    color="primary"
-                    disabled={
-                      !this.allTypesSelected() ||
-                      !this.state.baseImageSelected ||
-                      this.state.loading
-                    }
-                    style={{
-                      float: 'right'
+                  <Stack
+                    direction="row"
+                    sx={{
+                      justifyContent: 'flex-end'
                     }}
                   >
-                    Containerize
-                  </Button>
-                </div>
+                    <Button
+                      variant="contained"
+                      onClick={this.onContainerize}
+                      color="primary"
+                      disabled={
+                        !this.allTypesSelected() ||
+                        !this.state.baseImageSelected ||
+                        this.state.loading
+                      }
+                    >
+                      Containerize
+                    </Button>
+                  </Stack>
+                </>
               )}
-            </div>
+            </>
           )}
-        </div>
+        </Stack>
       </ThemeProvider>
     );
   }

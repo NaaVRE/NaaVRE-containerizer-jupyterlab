@@ -45,8 +45,8 @@ export namespace NaaVRECatalogue {
     export interface ICell extends BaseAssets.IBaseAsset {
       version: number;
       next_version: ICell | null;
-      container_image: string;
-      base_container_image?: IBaseImage;
+      container_image: string | null;
+      base_container_image?: IBaseImage | null;
       dependencies: Array<IDependency>;
       inputs: Array<IInput>;
       outputs: Array<IOutput>;
@@ -55,6 +55,7 @@ export namespace NaaVRECatalogue {
       secrets: Array<ISecret>;
       kernel?: string;
       source_url?: string;
+      is_draft?: boolean;
     }
   }
 }

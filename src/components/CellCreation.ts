@@ -128,15 +128,11 @@ async function getLatestCellVersionFromCatalogue({
 
 async function addCellToCatalogue({
   cell,
-  containerizeResponse,
   settings
 }: {
   cell: NaaVRECatalogue.WorkflowCells.ICell;
-  containerizeResponse: ContainerizeResponse;
   settings: IVREPanelSettings;
 }): Promise<CatalogueResponseItem> {
-  cell.container_image = containerizeResponse?.container_image || '';
-  cell.source_url = containerizeResponse?.source_url || '';
   cell.description = cell.title;
   cell.virtual_lab = settings.virtualLab || undefined;
 
@@ -168,7 +164,6 @@ async function patchCellInCatalogue({
 
 async function addCellToCatalogueAndLinkPreviousVersion(
   cell: NaaVRECatalogue.WorkflowCells.ICell,
-  containerizeResponse: ContainerizeResponse,
   settings: IVREPanelSettings
 ): Promise<'added' | 'updated'> {
   const previousCell = await getLatestCellVersionFromCatalogue({
@@ -178,7 +173,6 @@ async function addCellToCatalogueAndLinkPreviousVersion(
   cell.version = previousCell !== null ? previousCell.version + 1 : 1;
   const newCell = await addCellToCatalogue({
     cell,
-    containerizeResponse: containerizeResponse,
     settings
   });
   if (previousCell !== null) {
@@ -192,16 +186,12 @@ async function addCellToCatalogueAndLinkPreviousVersion(
   }
 }
 
-export async function createCell(
+async function createCellContainer(
   cell: NaaVRECatalogue.WorkflowCells.ICell,
   settings: IVREPanelSettings,
-  forceContainerize: boolean
-) {
-  const notificationId = Notification.emit(
-    `Containerizing ${cell.title}: submitting cell`,
-    'in-progress',
-    { autoClose: false }
-  );
+  forceContainerize: boolean,
+  notificationId: string
+): Promise<ContainerizeResponse | null> {
   let containerizeResponse: ContainerizeResponse;
   try {
     containerizeResponse = await callContainerizeAPI(
@@ -217,7 +207,7 @@ export async function createCell(
       message: `Failed to containerize ${cell.title}: cannot submit cell`,
       autoClose: 5000
     });
-    return;
+    return null;
   }
   if (!containerizeResponse.dispatched_github_workflow) {
     Notification.update({
@@ -226,7 +216,7 @@ export async function createCell(
       message: `Cell ${cell.title} is already containerized`,
       autoClose: 5000
     });
-    return;
+    return null;
   }
 
   await new Promise(r => setTimeout(r, 5000));
@@ -263,7 +253,7 @@ export async function createCell(
       message: `Failed to containerize ${cell.title}: could not start build job`,
       autoClose: 5000
     });
-    return;
+    return null;
   }
 
   Notification.update({
@@ -330,9 +320,16 @@ export async function createCell(
       ],
       autoClose: 5000
     });
-    return;
+    return null;
   }
+  return containerizeResponse;
+}
 
+async function createCellInCatalogue(
+  cell: NaaVRECatalogue.WorkflowCells.ICell,
+  settings: IVREPanelSettings,
+  notificationId: string
+): Promise<boolean> {
   Notification.update({
     id: notificationId,
     message: `Containerizing ${cell.title}: saving to the catalogue`,
@@ -341,7 +338,6 @@ export async function createCell(
   try {
     const catalogueResponse = await addCellToCatalogueAndLinkPreviousVersion(
       cell,
-      containerizeResponse,
       settings
     );
     console.debug('catalogueResponse', catalogueResponse);
@@ -352,13 +348,52 @@ export async function createCell(
       message: `Failed to containerize ${cell.title}: save to the catalogue`,
       autoClose: 5000
     });
+    return false;
+  }
+  return true;
+}
+
+export async function createCell(
+  cell: NaaVRECatalogue.WorkflowCells.ICell,
+  settings: IVREPanelSettings,
+  forceContainerize: boolean,
+  createDraft: boolean
+) {
+  const notificationId = Notification.emit(
+    createDraft
+      ? `Creating draft ${cell.title}`
+      : `Containerizing ${cell.title}: submitting cell`,
+    'in-progress',
+    { autoClose: false }
+  );
+  if (!createDraft) {
+    const containerizeResponse = await createCellContainer(
+      cell,
+      settings,
+      forceContainerize,
+      notificationId
+    );
+    if (containerizeResponse === null) {
+      return;
+    }
+    cell.container_image = containerizeResponse?.container_image || '';
+    cell.source_url = containerizeResponse?.source_url || '';
+  } else {
+    cell.container_image = null;
+    delete cell.base_container_image;
+    delete cell.source_url;
+    cell.is_draft = true;
+  }
+
+  const success = await createCellInCatalogue(cell, settings, notificationId);
+  if (!success) {
     return;
   }
 
   Notification.update({
     id: notificationId,
     type: 'success',
-    message: `Containerized ${cell.title}`,
+    message: `${createDraft ? 'Created draft' : 'Containerized'} ${cell.title}`,
     autoClose: 5000
   });
 }

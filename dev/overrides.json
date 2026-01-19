@@ -2,6 +2,6 @@
   "@naavre/containerizer-jupyterlab:plugin": {
     "virtualLab": "test-virtual-lab-1",
     "containerizerServiceUrl": "http://localhost:41918",
-    "catalogueServiceUrl": "http://localhost:19036"
+    "catalogueServiceUrl": "http://localhost:8000"
   }
 }

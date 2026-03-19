@@ -12,14 +12,17 @@ import {
 } from '@material-ui/core';
 
 interface ICellDependenciesTable {
+  title: string;
   items: Array<NaaVRECatalogue.WorkflowCells.IDependency>;
 }
 
 export const CellDependenciesTable: React.FC<ICellDependenciesTable> = ({
+  title,
   items
 }) => {
   return (
     <div>
+      <p>{title}</p>
       <TableContainer component={Paper}>
         <Table aria-label="simple table">
           <TableBody>

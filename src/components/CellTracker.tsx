@@ -477,6 +477,7 @@ export class CellTracker extends React.Component<IProps, IState> {
               )}
               {this.state.currentCell.dependencies.length > 0 && (
                 <CellDependenciesTable
+                  title={'Dependencies'}
                   items={this.state.currentCell.dependencies}
                 ></CellDependenciesTable>
               )}

@@ -2,6 +2,46 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.5.0
+
+([Full Changelog](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/compare/v0.4.3...d2788f06983ae7a244c2317368fd9a3e8903753e))
+
+### Bugs fixed
+
+- Fix #102 Dependencies title is missing [#103](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/103) ([@gpelouze](https://github.com/gpelouze))
+
+### Maintenance and upkeep improvements
+
+- Replace wf component `.next_version` with `.versions` [#116](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/116) ([@gpelouze](https://github.com/gpelouze))
+- Bump @babel/plugin-transform-modules-systemjs from 7.25.9 to 7.29.4 [#113](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/113) ([@gpelouze](https://github.com/gpelouze))
+- Bump fast-uri from 3.0.3 to 3.1.2 [#112](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/112) ([@gpelouze](https://github.com/gpelouze))
+- Bump dompurify from 3.3.1 to 3.4.1 [#111](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/111) ([@gpelouze](https://github.com/gpelouze))
+- Bump lodash from 4.17.23 to 4.18.1 [#109](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/109) ([@gpelouze](https://github.com/gpelouze))
+- Bump actions/create-github-app-token from 2 to 3 [#108](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/108) ([@gpelouze](https://github.com/gpelouze))
+- Bump picomatch from 2.3.1 to 2.3.2 [#107](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/107) ([@gpelouze](https://github.com/gpelouze))
+- Bump yaml from 1.10.2 to 1.10.3 [#105](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/105) ([@gpelouze](https://github.com/gpelouze))
+- Bump flatted from 3.3.2 to 3.4.2 [#104](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/104) ([@gpelouze](https://github.com/gpelouze))
+- Bump the mui group with 2 updates [#99](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/99) ([@gpelouze](https://github.com/gpelouze))
+- Bump actions/upload-artifact from 6 to 7 [#98](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/98) ([@gpelouze](https://github.com/gpelouze))
+- Bump actions/download-artifact from 7 to 8 [#97](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/97) ([@gpelouze](https://github.com/gpelouze))
+- Bump ajv from 6.12.6 to 6.14.0 [#96](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/96) ([@gpelouze](https://github.com/gpelouze))
+- Bump webpack from 5.96.1 to 5.105.0 [#94](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/94) ([@gpelouze](https://github.com/gpelouze))
+- Bump p-retry from 6.2.1 to 7.1.1 [#93](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/93) ([@gpelouze](https://github.com/gpelouze))
+- Bump css-loader from 6.11.0 to 7.1.3 [#92](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/92) ([@gpelouze](https://github.com/gpelouze))
+- Bump the mui group with 2 updates [#91](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/91) ([@gpelouze](https://github.com/gpelouze))
+- Bump lodash from 4.17.21 to 4.17.23 [#89](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/89) ([@gpelouze](https://github.com/gpelouze))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/graphs/contributors?from=2026-01-19&to=2026-05-12&type=c))
+
+@gpelouze ([activity](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Agpelouze+updated%3A2026-01-19..2026-05-12&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.4.3
 
 ([Full Changelog](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/compare/v0.4.2...bf9c9bce585051c8f463536c3f5c54149426d050))
@@ -18,8 +58,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/graphs/contributors?from=2026-01-09&to=2026-01-19&type=c))
 
 @gpelouze ([activity](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Agpelouze+updated%3A2026-01-09..2026-01-19&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.4.2
 

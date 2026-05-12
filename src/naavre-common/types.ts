@@ -10,6 +10,12 @@ export namespace NaaVRECatalogue {
       virtual_lab?: string | null;
     }
   }
+
+  export interface IAssetVersionsRef {
+    version: number;
+    url: string;
+  }
+
   export namespace WorkflowCells {
     export interface IBaseImage {
       build: string;
@@ -44,7 +50,7 @@ export namespace NaaVRECatalogue {
 
     export interface ICell extends BaseAssets.IBaseAsset {
       version: number;
-      next_version: ICell | null;
+      versions: IAssetVersionsRef[];
       container_image: string | null;
       base_container_image?: IBaseImage | null;
       dependencies: Array<IDependency>;

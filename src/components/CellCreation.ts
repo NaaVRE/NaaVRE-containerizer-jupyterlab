@@ -35,6 +35,13 @@ declare type StatusResponse = {
   };
 } | null;
 
+declare type CataloguePayloadCreateCell = Omit<
+  NaaVRECatalogue.WorkflowCells.ICell,
+  'version' | 'versions'
+> & {
+  previous_version?: string;
+};
+
 declare type CatalogueResponseItem = {
   url: string;
 } & NaaVRECatalogue.WorkflowCells.ICell;
@@ -130,7 +137,7 @@ async function addCellToCatalogue({
   cell,
   settings
 }: {
-  cell: NaaVRECatalogue.WorkflowCells.ICell;
+  cell: CataloguePayloadCreateCell;
   settings: IVREPanelSettings;
 }): Promise<CatalogueResponseItem> {
   cell.description = cell.title;
@@ -148,42 +155,35 @@ async function addCellToCatalogue({
   return JSON.parse(resp.content);
 }
 
-async function patchCellInCatalogue({
-  cellUrl,
-  payload
-}: {
-  cellUrl: string;
-  payload: object;
-}): Promise<CatalogueResponseItem> {
-  const resp = await NaaVREExternalService('PATCH', cellUrl, {}, payload);
-  if (resp.status_code !== 200) {
-    throw `${resp.status_code} ${resp.reason}`;
-  }
-  return JSON.parse(resp.content);
-}
-
 async function addCellToCatalogueAndLinkPreviousVersion(
   cell: NaaVRECatalogue.WorkflowCells.ICell,
   settings: IVREPanelSettings
 ): Promise<'added' | 'updated'> {
+  let msg: 'added' | 'updated';
+  const {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    version,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    versions,
+    ...payloadCell
+  }: { version: unknown; versions: unknown } & CataloguePayloadCreateCell =
+    cell;
   const previousCell = await getLatestCellVersionFromCatalogue({
     cell: cell,
     settings: settings
   });
-  cell.version = previousCell !== null ? previousCell.version + 1 : 1;
-  const newCell = await addCellToCatalogue({
-    cell,
-    settings
-  });
   if (previousCell !== null) {
-    await patchCellInCatalogue({
-      cellUrl: previousCell.url,
-      payload: { next_version: newCell.url }
-    });
-    return 'updated';
+    payloadCell.previous_version = previousCell.url;
+    msg = 'updated';
   } else {
-    return 'added';
+    msg = 'added';
   }
+
+  await addCellToCatalogue({
+    cell: payloadCell,
+    settings: settings
+  });
+  return msg;
 }
 
 async function createCellContainer(

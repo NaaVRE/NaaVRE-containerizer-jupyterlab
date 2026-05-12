@@ -37,7 +37,7 @@ const DefaultCell: NaaVRECatalogue.WorkflowCells.ICell = {
   title: '',
   description: '',
   version: 1,
-  next_version: null,
+  versions: [],
   container_image: '',
   inputs: [],
   outputs: [],

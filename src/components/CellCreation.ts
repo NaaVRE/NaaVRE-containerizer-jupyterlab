@@ -121,7 +121,8 @@ async function getLatestCellVersionFromCatalogue({
   const res = await findCellInCatalogue({
     searchParams: new URLSearchParams({
       title: cell.title,
-      virtual_lab: settings.virtualLab
+      virtual_lab: settings.virtualLab,
+      ordering: '-created'
     }),
     settings
   });

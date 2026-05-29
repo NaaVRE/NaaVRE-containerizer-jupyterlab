@@ -18,7 +18,8 @@ import {
   Box,
   Checkbox,
   LinearProgress,
-  Stack
+  Stack,
+  Typography
 } from '@mui/material';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { emptyChart } from '../naavre-common/emptyChart';
@@ -27,6 +28,7 @@ import { CellIOTable } from './CellIOTable';
 import { CellDependenciesTable } from './CellDependenciesTable';
 import { detectType } from '../services/rTypes';
 import { createCell } from './CellCreation';
+import { Collapsible } from './Collapsible';
 
 interface IProps {
   notebook: NotebookPanel | null;
@@ -47,12 +49,17 @@ const DefaultCell: NaaVRECatalogue.WorkflowCells.ICell = {
   dependencies: []
 };
 
+interface IExtractorError {
+  message: string;
+  details: string;
+}
+
 interface IState {
   baseImageSelected: boolean;
   baseImages: any[];
   cellAnalyzed: boolean;
   currentCell: NaaVRECatalogue.WorkflowCells.ICell;
-  extractorError: string;
+  extractorError: string | IExtractorError;
   isDialogOpen: boolean;
   loading: boolean;
   typeSelections: { [type: string]: boolean };
@@ -210,7 +217,22 @@ export class CellTracker extends React.Component<IProps, IState> {
     )
       .then(resp => {
         if (resp.status_code !== 200) {
-          throw `${resp.status_code} ${resp.reason}`;
+          // Use http reason as default message
+          const error: IExtractorError = {
+            message: resp.reason,
+            details: JSON.stringify(resp)
+          };
+          // Use error message from the server if available
+          let data: { detail?: string };
+          try {
+            data = JSON.parse(resp.content);
+            if (data.detail !== undefined) {
+              error.message = data.detail;
+            }
+          } catch {
+            /* empty */
+          }
+          throw error;
         }
         return JSON.parse(resp.content);
       })
@@ -253,9 +275,22 @@ export class CellTracker extends React.Component<IProps, IState> {
       })
       .catch(reason => {
         console.log(reason);
+        let extractorError: string | IExtractorError;
+        if (typeof reason === 'string') {
+          extractorError = reason;
+        } else if (
+          reason !== null &&
+          typeof reason === 'object' &&
+          typeof reason.message === 'string' &&
+          typeof reason.details === 'string'
+        ) {
+          extractorError = reason as IExtractorError;
+        } else {
+          extractorError = String(reason);
+        }
         this.setState({
           loading: false,
-          extractorError: String(reason)
+          extractorError: extractorError
         });
       });
   };
@@ -412,11 +447,22 @@ export class CellTracker extends React.Component<IProps, IState> {
             </Stack>
           )}
           {this.state.extractorError && (
-            <div>
-              <Alert severity="error">
-                <p>Notebook cannot be analyzed: {this.state.extractorError}</p>
-              </Alert>
-            </div>
+            <Alert severity="error">
+              {typeof this.state.extractorError === 'string' ? (
+                <Typography variant="body2">
+                  {this.state.extractorError}
+                </Typography>
+              ) : (
+                <>
+                  <Typography variant="body2">
+                    {this.state.extractorError.message}
+                  </Typography>
+                  <Collapsible summary="Details" sx={{ mt: 3 }}>
+                    {this.state.extractorError.details}
+                  </Collapsible>
+                </>
+              )}
+            </Alert>
           )}
           {this.state.loading ? (
             <>

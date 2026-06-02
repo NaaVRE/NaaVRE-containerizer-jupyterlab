@@ -2,6 +2,33 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.5.1
+
+([Full Changelog](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/compare/v0.5.0...9553e3ac4a1baef95391d1524e3c3436b66d5a89))
+
+### Enhancements made
+
+- Display error message detail when failing to analyze a cell [#123](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/123) ([@gpelouze](https://github.com/gpelouze))
+
+### Maintenance and upkeep improvements
+
+- Bump lodash-es from 4.17.21 to 4.18.1 [#124](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/124) ([@gpelouze](https://github.com/gpelouze))
+- Bump ws from 8.18.0 to 8.21.0 [#122](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/122) ([@gpelouze](https://github.com/gpelouze))
+- Bump @tootallnate/once from 2.0.0 to 2.0.1 [#120](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/120) ([@gpelouze](https://github.com/gpelouze))
+- Fix getLatestCellVersionFromCatalogue behaviour [#118](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/118) ([@gpelouze](https://github.com/gpelouze))
+- Bump mermaid from 11.12.2 to 11.15.0 [#114](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/114) ([@gpelouze](https://github.com/gpelouze))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/graphs/contributors?from=2026-05-12&to=2026-06-02&type=c))
+
+@gpelouze ([activity](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Agpelouze+updated%3A2026-05-12..2026-06-02&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.5.0
 
 ([Full Changelog](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/compare/v0.4.3...d2788f06983ae7a244c2317368fd9a3e8903753e))
@@ -39,8 +66,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/graphs/contributors?from=2026-01-19&to=2026-05-12&type=c))
 
 @gpelouze ([activity](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Agpelouze+updated%3A2026-01-19..2026-05-12&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.4.3
 

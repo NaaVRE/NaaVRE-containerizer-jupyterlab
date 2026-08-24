@@ -1,6 +1,6 @@
+import { NaaVREExternalService } from '@naavre/communicator-jupyterlab';
 import { NaaVRECatalogue } from '../naavre-common/types';
 import { IVREPanelSettings } from '../VREPanel';
-import { NaaVREExternalService } from '../naavre-common/handler';
 
 declare type CataloguePayloadCreateCell = Omit<
   NaaVRECatalogue.WorkflowCells.ICell,

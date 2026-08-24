@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { NaaVREExternalService } from '../naavre-common/handler';
+import { NaaVREExternalService } from '@naavre/communicator-jupyterlab';
 import { CellPreview, cellsToChartNode } from '../naavre-common/CellPreview';
 import { NaaVRECatalogue } from '../naavre-common/types';
 import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';

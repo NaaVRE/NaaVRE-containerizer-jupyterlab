@@ -1,5 +1,5 @@
+import { NaaVREExternalService } from '@naavre/communicator-jupyterlab';
 import { IVREPanelSettings } from '../VREPanel';
-import { NaaVREExternalService } from '../naavre-common/handler';
 import { NaaVRECatalogue } from '../naavre-common/types';
 
 export declare type ContainerizeResponse = {

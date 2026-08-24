@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { theme } from './Theme';
-import { ThemeProvider } from '@material-ui/core/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { CellTracker } from './components/CellTracker';
 import { Slot } from '@lumino/signaling';
-import { Divider } from '@material-ui/core';
+import Divider from '@mui/material/Divider';
 
 export interface IVREPanelSettings {
   virtualLab: string | null;

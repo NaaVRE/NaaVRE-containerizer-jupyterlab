@@ -6,21 +6,21 @@ services:
     ports:
       - '127.0.0.1:41918:8000'
     environment:
-      VERIFY_SSL: false
-      DISABLE_AUTH: true
+      VERIFY_SSL: "false"
+      DISABLE_AUTH: "true"
       CONFIG_FILE_URL: "/configuration.json"
     volumes:
       - ./containerizer-config.json:/configuration.json
 
   catalogue-service:
-    image: ghcr.io/naavre/naavre-catalogue-service:v0.6.0
+    image: ghcr.io/naavre/naavre-catalogue-service:v0.6.9
     network_mode: host
     ports:
       - '127.0.0.1:8000:8000'
     environment:
-      DEV_MODE: true
-      VERIFY_SSL: false
-      DISABLE_AUTH: true
+      DEV_MODE: "true"
+      VERIFY_SSL: "false"
+      DISABLE_AUTH: "true"
       DJANGO_SUPERUSER_USERNAME: admin
       DJANGO_SUPERUSER_PASSWORD: admin
       DJANGO_SUPERUSER_EMAIL: example@example.org

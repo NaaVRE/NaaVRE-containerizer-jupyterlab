@@ -1,27 +1,25 @@
 import * as React from 'react';
-import { NaaVREExternalService } from '../naavre-common/handler';
+import { ThemeProvider } from '@mui/material/styles';
+import Alert from '@mui/material/Alert';
+import Autocomplete from '@mui/material/Autocomplete';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
+import CircularProgress from '@mui/material/CircularProgress';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import LinearProgress from '@mui/material/LinearProgress';
+import Stack from '@mui/material/Stack';
+import TableContainer from '@mui/material/TableContainer';
+import TextField from '@mui/material/TextField';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import { SelectChangeEvent } from '@mui/material/Select';
+
+import { NaaVREExternalService } from '@naavre/communicator-jupyterlab';
 import { CellPreview, cellsToChartNode } from '../naavre-common/CellPreview';
 import { NaaVRECatalogue } from '../naavre-common/types';
 import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 import { theme } from '../Theme';
-import TableContainer from '@material-ui/core/TableContainer';
-import {
-  Button,
-  FormControlLabel,
-  TextField,
-  ThemeProvider,
-  Tooltip
-} from '@material-ui/core';
-import {
-  Alert,
-  Autocomplete,
-  Box,
-  Checkbox,
-  LinearProgress,
-  Stack,
-  Typography
-} from '@mui/material';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { emptyChart } from '../naavre-common/emptyChart';
 import { IVREPanelSettings } from '../VREPanel';
 import { CellIOTable } from './CellIOTable';
@@ -29,6 +27,7 @@ import { CellDependenciesTable } from './CellDependenciesTable';
 import { detectType } from '../services/rTypes';
 import { createCell } from './CellCreation';
 import { Collapsible } from './Collapsible';
+import IBaseImage = NaaVRECatalogue.WorkflowCells.IBaseImage;
 
 interface IProps {
   notebook: NotebookPanel | null;
@@ -348,7 +347,7 @@ export class CellTracker extends React.Component<IProps, IState> {
   };
 
   updateVariableType = async (
-    event: React.ChangeEvent<{ name?: string; value: unknown }>,
+    event: SelectChangeEvent,
     variable: NaaVRECatalogue.WorkflowCells.IBaseVariable,
     variableCategory: 'inputs' | 'outputs' | 'params' | 'secrets'
   ) => {
@@ -366,12 +365,12 @@ export class CellTracker extends React.Component<IProps, IState> {
     });
   };
 
-  updateBaseImage = async (value: any) => {
+  updateBaseImage = async (value: IBaseImage | null) => {
     const updatedCell = this.state.currentCell;
     console.log('updateBaseImage', value);
     updatedCell.base_container_image = value;
     this.setState({
-      baseImageSelected: true,
+      baseImageSelected: value !== null,
       currentCell: updatedCell
     });
   };
@@ -535,8 +534,11 @@ export class CellTracker extends React.Component<IProps, IState> {
                       getOptionLabel={option => option.name}
                       options={this.state.baseImages}
                       disablePortal
-                      onChange={(_event: any, newValue: any | null) => {
-                        this.updateBaseImage(newValue.image);
+                      onChange={(
+                        _event: any,
+                        newValue: { name: string; image: IBaseImage } | null
+                      ) => {
+                        this.updateBaseImage(newValue?.image ?? null);
                       }}
                       id="combo-box-demo"
                       renderInput={params => <TextField {...params} />}

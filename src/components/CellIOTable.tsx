@@ -2,25 +2,23 @@ import React from 'react';
 
 import { NaaVRECatalogue } from '../naavre-common/types';
 
-import {
-  FormControl,
-  IconButton,
-  MenuItem,
-  Paper,
-  Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow
-} from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '@mui/icons-material/Close';
+import FormControl from '@mui/material/FormControl';
+import IconButton from '@mui/material/IconButton';
+import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableRow from '@mui/material/TableRow';
 
 interface ICellIOTable {
   title: string;
   ioItems: Array<NaaVRECatalogue.WorkflowCells.IBaseVariable>;
   updateType: (
-    event: React.ChangeEvent<{ name?: string; value: unknown }>,
+    event: SelectChangeEvent,
     port: NaaVRECatalogue.WorkflowCells.IBaseVariable
   ) => Promise<void>;
   removeEntry: (
@@ -65,7 +63,6 @@ export const CellIOTable: React.FC<ICellIOTable> = ({
                       <Select
                         labelId="io-types-select-label"
                         id={ioItem.name + '-select'}
-                        label="Type"
                         value={ioItem.type || ''}
                         error={ioItem.type === null}
                         onChange={event => {

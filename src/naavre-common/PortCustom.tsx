@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { IPortDefaultProps } from '@mrblenny/react-flow-chart';
-import { Tooltip } from '@material-ui/core';
+import Tooltip from '@mui/material/Tooltip';
 import * as React from 'react';
 
 const PortContainerLeft = styled.div`

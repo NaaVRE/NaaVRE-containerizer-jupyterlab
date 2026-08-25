@@ -1,6 +1,10 @@
 import React, { ReactNode, useState } from 'react';
-import { Box, ButtonBase, Collapse, SxProps, Typography } from '@mui/material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import Box from '@mui/material/Box';
+import ButtonBase from '@mui/material/ButtonBase';
+import Collapse from '@mui/material/Collapse';
+import Typography from '@mui/material/Typography';
+import { SxProps } from '@mui/material/styles';
 
 interface ICollapsible {
   summary: ReactNode;

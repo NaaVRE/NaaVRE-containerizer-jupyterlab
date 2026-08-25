@@ -534,7 +534,10 @@ export class CellTracker extends React.Component<IProps, IState> {
                       getOptionLabel={option => option.name}
                       options={this.state.baseImages}
                       disablePortal
-                      onChange={(_event: any, newValue: {name: string, image: IBaseImage } | null) => {
+                      onChange={(
+                        _event: any,
+                        newValue: { name: string; image: IBaseImage } | null
+                      ) => {
                         this.updateBaseImage(newValue?.image ?? null);
                       }}
                       id="combo-box-demo"

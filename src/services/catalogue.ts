@@ -18,7 +18,7 @@ declare type CatalogueResponse = {
   results: ICatalogCell[];
 };
 
-async function findCellInCatalogue({
+async function findCellsInCatalogue({
   searchParams,
   settings
 }: {
@@ -46,7 +46,7 @@ async function getLatestCellVersionFromCatalogue({
   if (settings.virtualLab === null) {
     throw 'Virtual lab is null, check @naavre/containerizer-jupyterlab settings';
   }
-  const res = await findCellInCatalogue({
+  const res = await findCellsInCatalogue({
     searchParams: new URLSearchParams({
       title: cell.title,
       virtual_lab: settings.virtualLab,
@@ -119,4 +119,16 @@ export async function addCellToCatalogueAndLinkPreviousVersion(
     cell: payloadCell,
     settings: settings
   });
+}
+
+export async function getContainerizingCells(
+  settings: IVREPanelSettings
+): Promise<ICatalogCell[]> {
+  const res = await findCellsInCatalogue({
+    searchParams: new URLSearchParams({
+      containerization_completed: 'false'
+    }),
+    settings
+  });
+  return res.results;
 }

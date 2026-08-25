@@ -1,14 +1,10 @@
-import {
-  ILayoutRestorer,
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
+import { ILayoutRestorer, JupyterFrontEnd, JupyterFrontEndPlugin } from '@jupyterlab/application';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { VREPanelWidget } from './widget';
-import { IVREPanelSettings } from './VREPanel';
 import { extensionIcon } from './icons';
+import { restoreCellCreationTrackers } from './cell-creation-restorer';
 
 /**
  * Initialization data for the @naavre/containerizer-jupyterlab extension.
@@ -39,9 +35,17 @@ const plugin: JupyterFrontEndPlugin<void> = {
           function onSettingsChanged(
             settings: ISettingRegistry.ISettings
           ): void {
-            widget.updateSettings(
-              settings.composite as Partial<IVREPanelSettings>
-            );
+            const appSettings = {
+              virtualLab: settings.get('virtualLab').composite as string,
+              isDraftDefault: settings.get('isDraftDefault')
+                .composite as boolean,
+              containerizerServiceUrl: settings.get('containerizerServiceUrl')
+                .composite as string,
+              catalogueServiceUrl: settings.get('catalogueServiceUrl')
+                .composite as string
+            };
+            widget.updateSettings(appSettings);
+            restoreCellCreationTrackers(appSettings);
           }
           settings.changed.connect(onSettingsChanged);
           onSettingsChanged(settings);

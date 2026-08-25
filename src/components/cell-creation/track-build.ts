@@ -186,7 +186,7 @@ export async function trackBuild(
   let notificationId: string;
   if (existingNotificationId === null) {
     notificationId = Notification.emit(
-      `Containerizing ${cell.title}`,
+      `Containerizing ${cell.title} (waiting for status)`,
       'in-progress',
       { autoClose: false }
     );

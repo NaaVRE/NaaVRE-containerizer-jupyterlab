@@ -6,30 +6,11 @@ export declare type ContainerizeResponse = {
   workflow_id: string;
   dispatched_github_workflow: boolean;
   container_image: string;
-  workflow_url: string;
   source_url: string;
 };
 export declare type StatusResponse = {
-  job: {
-    html_url: string;
-    status:
-      | 'queued'
-      | 'in_progress'
-      | 'completed'
-      | 'waiting'
-      | 'requested'
-      | 'pending';
-    conclusion:
-      | 'success'
-      | 'failure'
-      | 'neutral'
-      | 'cancelled'
-      | 'skipped'
-      | 'timed_out'
-      | 'action_required'
-      | null;
-  };
-} | null;
+  job: NaaVRECatalogue.WorkflowCells.IContainerizationJob;
+};
 
 export async function callContainerizeAPI(
   cell: NaaVRECatalogue.WorkflowCells.ICell,

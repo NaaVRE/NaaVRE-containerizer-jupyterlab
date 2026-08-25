@@ -8,14 +8,14 @@ declare type CataloguePayloadCreateCell = Omit<
 > & {
   previous_version?: string;
 };
-declare type CatalogueResponseItem = {
+export declare type ICatalogCell = {
   url: string;
 } & NaaVRECatalogue.WorkflowCells.ICell;
 declare type CatalogueResponse = {
   count: number;
   next: string | null;
   previous: string | null;
-  results: CatalogueResponseItem[];
+  results: ICatalogCell[];
 };
 
 async function findCellInCatalogue({
@@ -41,7 +41,7 @@ async function getLatestCellVersionFromCatalogue({
 }: {
   cell: NaaVRECatalogue.WorkflowCells.ICell;
   settings: IVREPanelSettings;
-}): Promise<CatalogueResponseItem | null> {
+}): Promise<ICatalogCell | null> {
   cell.virtual_lab = settings.virtualLab || undefined;
   if (settings.virtualLab === null) {
     throw 'Virtual lab is null, check @naavre/containerizer-jupyterlab settings';
@@ -68,7 +68,7 @@ async function addCellToCatalogue({
 }: {
   cell: CataloguePayloadCreateCell;
   settings: IVREPanelSettings;
-}): Promise<CatalogueResponseItem> {
+}): Promise<ICatalogCell> {
   cell.description = cell.title;
   cell.virtual_lab = settings.virtualLab || undefined;
 
@@ -84,11 +84,21 @@ async function addCellToCatalogue({
   return JSON.parse(resp.content);
 }
 
+export async function patchCellInCatalogue(
+  cell: ICatalogCell,
+  cellUpdate: Partial<NaaVRECatalogue.WorkflowCells.ICell>
+): Promise<ICatalogCell> {
+  const resp = await NaaVREExternalService('PATCH', cell.url, {}, cellUpdate);
+  if (resp.status_code !== 200) {
+    throw `${resp.status_code} ${resp.reason}`;
+  }
+  return JSON.parse(resp.content);
+}
+
 export async function addCellToCatalogueAndLinkPreviousVersion(
   cell: NaaVRECatalogue.WorkflowCells.ICell,
   settings: IVREPanelSettings
-): Promise<'added' | 'updated'> {
-  let msg: 'added' | 'updated';
+): Promise<ICatalogCell> {
   const {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     version,
@@ -103,14 +113,10 @@ export async function addCellToCatalogueAndLinkPreviousVersion(
   });
   if (previousCell !== null) {
     payloadCell.previous_version = previousCell.url;
-    msg = 'updated';
-  } else {
-    msg = 'added';
   }
 
-  await addCellToCatalogue({
+  return await addCellToCatalogue({
     cell: payloadCell,
     settings: settings
   });
-  return msg;
 }

@@ -34,13 +34,16 @@ export async function createDraft(
     { autoClose: false }
   );
 
-  cell.container_image = null;
-  delete cell.base_container_image;
-  delete cell.source_url;
-  cell.is_draft = true;
+  const draftCell = {
+    ...cell,
+    container_image: null,
+    is_draft: true
+  };
+  delete draftCell.base_container_image;
+  delete draftCell.source_url;
 
   const success = await createDraftCellInCatalogue(
-    cell,
+    draftCell,
     settings,
     notificationId
   );
@@ -51,7 +54,7 @@ export async function createDraft(
   Notification.update({
     id: notificationId,
     type: 'success',
-    message: `Created draft ${cell.title}`,
+    message: `Created draft ${draftCell.title}`,
     autoClose: 5000
   });
 }

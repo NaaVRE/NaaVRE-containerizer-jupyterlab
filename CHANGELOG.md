@@ -2,6 +2,34 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.5.3
+
+([Full Changelog](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/compare/v0.5.2...aa0ee2d508cc444c1b1867caef1a2e040fc12098))
+
+### Bugs fixed
+
+- Fix #162: When creating a workflow component as a draft, we can't have it as a component again [#163](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/163) ([@gpelouze](https://github.com/gpelouze))
+
+### Maintenance and upkeep improvements
+
+- Bump js-yaml from 3.15.1 to 3.15.2 [#165](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/165) ([@gpelouze](https://github.com/gpelouze))
+- Bump browserslist from 4.24.2 to 4.28.9 [#161](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/161) ([@gpelouze](https://github.com/gpelouze))
+- Bump fast-uri from 3.1.5 to 3.1.7 [#160](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/160) ([@gpelouze](https://github.com/gpelouze))
+- Bump postcss-selector-parser from 6.1.2 to 6.1.4 [#159](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/159) ([@gpelouze](https://github.com/gpelouze))
+- Bump prettier from 3.9.4 to 3.9.6 [#157](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/157) ([@gpelouze](https://github.com/gpelouze))
+- Bump the mui group with 2 updates [#156](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/pull/156) ([@gpelouze](https://github.com/gpelouze))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/graphs/contributors?from=2026-08-31&to=2026-09-09&type=c))
+
+@gpelouze ([activity](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Agpelouze+updated%3A2026-08-31..2026-09-09&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.5.2
 
 ([Full Changelog](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/compare/v0.5.1...9e83b6644f9f90a41d8eb4cc9b917034b13710bd))
@@ -40,8 +68,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/NaaVRE/NaaVRE-containerizer-jupyterlab/graphs/contributors?from=2026-06-02&to=2026-08-31&type=c))
 
 @gpelouze ([activity](https://github.com/search?q=repo%3ANaaVRE%2FNaaVRE-containerizer-jupyterlab+involves%3Agpelouze+updated%3A2026-06-02..2026-08-31&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.5.1
 

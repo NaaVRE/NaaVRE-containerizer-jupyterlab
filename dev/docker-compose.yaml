@@ -43,29 +43,19 @@ services:
       POSTGRES_PASSWORD: postgres-password
 
   catalogue-s3:
-    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
-    command: ["server", "/data", "--console-address", ":9001"]
+    image: chrislusf/seaweedfs:4.51
     network_mode: host
     ports:
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9001:9001"
     env_file:
       - catalogue-s3.env
+    entrypoint: ["sh", "-e", "/catalogue-s3-entrypoint.sh"]
+    volumes:
+      - ./catalogue-s3-entrypoint.sh:/catalogue-s3-entrypoint.sh:ro
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      # Healthy once the S3 API is up and the bucket has been created
+      test: ["CMD-SHELL", "curl -fs http://127.0.0.1:9000/healthz && curl -fs -o /dev/null http://127.0.0.1:9002/buckets/$${BUCKET_NAME}/"]
       interval: 5s
       timeout: 5s
       retries: 5
-
-  catalogue-configure-s3:
-    image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
-    depends_on:
-      catalogue-s3:
-        condition: service_healthy
-    network_mode: host
-    env_file:
-      - catalogue-s3.env
-    entrypoint: ["bash", "-e"]
-    command: "/configure-s3.sh"
-    volumes:
-      - ./configure-catalogue-s3.sh:/configure-s3.sh

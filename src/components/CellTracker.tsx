@@ -19,6 +19,7 @@ import { NaaVREExternalService } from '@naavre/communicator-jupyterlab';
 import { CellPreview, cellsToChartNode } from '../naavre-common/CellPreview';
 import { NaaVRECatalogue } from '../naavre-common/types';
 import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
+import type { INotebookContent } from '@jupyterlab/nbformat';
 import { theme } from '../Theme';
 import { emptyChart } from '../naavre-common/emptyChart';
 import { IVREPanelSettings } from '../VREPanel';
@@ -28,6 +29,23 @@ import { detectType } from '../services/rTypes';
 import { createCell } from './CellCreation';
 import { Collapsible } from './Collapsible';
 import IBaseImage = NaaVRECatalogue.WorkflowCells.IBaseImage;
+
+/**
+ * Return a copy of the notebook content without cell outputs.
+ *
+ * Outputs (e.g. plots) are not needed by the containerizer and can make the
+ * request too large to be processed.
+ */
+function stripNotebookOutputs(notebook: INotebookContent): INotebookContent {
+  return {
+    ...notebook,
+    cells: notebook.cells.map(cell =>
+      cell.cell_type === 'code'
+        ? { ...cell, outputs: [], execution_count: null }
+        : cell
+    )
+  };
+}
 
 interface IProps {
   notebook: NotebookPanel | null;
@@ -210,7 +228,9 @@ export class CellTracker extends React.Component<IProps, IState> {
           save: save,
           kernel,
           cell_index: cellIndex,
-          notebook: notebookModel.toJSON()
+          notebook: stripNotebookOutputs(
+            notebookModel.toJSON() as INotebookContent
+          )
         }
       }
     )

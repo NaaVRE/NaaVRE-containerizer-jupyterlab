@@ -16,11 +16,24 @@ export namespace NaaVRECatalogue {
     url: string;
   }
 
+  export namespace BinderEnvironments {
+    export interface IBinderEnvironment {
+      binder_ref: string;
+      container_image: string | null;
+    }
+  }
+
   export namespace WorkflowCells {
-    export interface IBaseImage {
+    export interface ITwoStageFlavorImage {
       build: string;
       runtime: string;
     }
+
+    export interface IBinderEnvironmentImage {
+      binder_environment: string;
+    }
+
+    export type IBaseImage = ITwoStageFlavorImage | IBinderEnvironmentImage;
 
     export interface IContainerizationJob {
       html_url: string;

@@ -7,6 +7,7 @@ import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import CircularProgress from '@mui/material/CircularProgress';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import IconButton from '@mui/material/IconButton';
 import LinearProgress from '@mui/material/LinearProgress';
 import Stack from '@mui/material/Stack';
 import TableContainer from '@mui/material/TableContainer';
@@ -14,6 +15,7 @@ import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { SelectChangeEvent } from '@mui/material/Select';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 import { NaaVREExternalService } from '@naavre/communicator-jupyterlab';
 import { CellPreview, cellsToChartNode } from '../naavre-common/CellPreview';
@@ -28,7 +30,22 @@ import { CellDependenciesTable } from './CellDependenciesTable';
 import { detectType } from '../services/rTypes';
 import { createCell } from './CellCreation';
 import { Collapsible } from './Collapsible';
+import { getBinderEnvironmentsWithContainerImage } from '../services/catalogue';
+import { getBaseImageTags } from '../services/containerizer';
 import IBaseImage = NaaVRECatalogue.WorkflowCells.IBaseImage;
+
+const BaseImageGroup = {
+  binderEnvironment: 'Binder environments',
+  flavor: 'Flavors (legacy)'
+} as const;
+
+type BaseImageGroup = (typeof BaseImageGroup)[keyof typeof BaseImageGroup];
+
+interface IBaseImageOption {
+  name: string;
+  group: BaseImageGroup;
+  image: IBaseImage;
+}
 
 /**
  * Return a copy of the notebook content without cell outputs.
@@ -73,7 +90,9 @@ interface IExtractorError {
 
 interface IState {
   baseImageSelected: boolean;
-  baseImages: any[];
+  flavorBaseImages: IBaseImageOption[];
+  binderEnvironmentBaseImages: IBaseImageOption[];
+  baseImagesLoading: boolean;
   cellAnalyzed: boolean;
   currentCell: NaaVRECatalogue.WorkflowCells.ICell;
   extractorError: string | IExtractorError;
@@ -86,7 +105,9 @@ interface IState {
 
 const DefaultState: IState = {
   baseImageSelected: false,
-  baseImages: [],
+  flavorBaseImages: [],
+  binderEnvironmentBaseImages: [],
+  baseImagesLoading: false,
   cellAnalyzed: false,
   currentCell: DefaultCell,
   extractorError: '',
@@ -108,34 +129,44 @@ export class CellTracker extends React.Component<IProps, IState> {
   }
 
   loadBaseImages = async () => {
-    NaaVREExternalService(
-      'GET',
-      `${this.props.settings.containerizerServiceUrl}/base-image-tags?virtual_lab=${this.props.settings.virtualLab}`
-    )
-      .then(resp => {
-        if (resp.status_code !== 200) {
-          throw `${resp.status_code} ${resp.reason}`;
-        }
-        return JSON.parse(resp.content);
-      })
-      .then(data => {
-        const updatedBaseImages = Object.entries(data).map(([name, image]) => ({
-          name,
-          image
-        }));
-        console.log('updatedBaseImages');
-        console.log(updatedBaseImages);
-        this.setState({ baseImages: updatedBaseImages });
-      })
-      .catch(reason => {
-        console.log(`Could not retrieve base image tags: ${reason}`);
-        console.log(reason);
-      });
+    this.setState({ baseImagesLoading: true });
+    await Promise.all([
+      getBinderEnvironmentsWithContainerImage(this.props.settings)
+        .then(environments =>
+          this.setState({
+            binderEnvironmentBaseImages: environments.map(env => ({
+              name: env.binder_ref,
+              group: BaseImageGroup.binderEnvironment,
+              image: { binder_environment: env.container_image as string }
+            }))
+          })
+        )
+        .catch(reason => {
+          console.log(`Could not retrieve binder environments: ${reason}`);
+        }),
+      getBaseImageTags(this.props.settings)
+        .then(data =>
+          this.setState({
+            flavorBaseImages: Object.entries(data).map(([name, image]) => ({
+              name,
+              group: BaseImageGroup.flavor,
+              image: { build: image.build, runtime: image.runtime }
+            }))
+          })
+        )
+        .catch(reason => {
+          console.log(`Could not retrieve base image tags: ${reason}`);
+        })
+    ]);
+    this.setState({ baseImagesLoading: false });
   };
 
   resetState = () => {
     const newState = DefaultState;
-    newState.baseImages = this.state.baseImages;
+    newState.flavorBaseImages = this.state.flavorBaseImages;
+    newState.binderEnvironmentBaseImages =
+      this.state.binderEnvironmentBaseImages;
+    newState.baseImagesLoading = this.state.baseImagesLoading;
     this.setState(newState);
     if (this.cellPreviewRef.current !== null) {
       this.cellPreviewRef.current.updateChart(emptyChart);
@@ -549,14 +580,44 @@ export class CellTracker extends React.Component<IProps, IState> {
               {this.state.cellAnalyzed && (
                 <>
                   <div>
-                    <p>Base Image</p>
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      sx={{ alignItems: 'center' }}
+                    >
+                      <p>Base Image</p>
+                      <Tooltip title="Refresh" placement="right">
+                        <span>
+                          <IconButton
+                            size="small"
+                            aria-label="Refresh base images"
+                            disabled={this.state.baseImagesLoading}
+                            onClick={() => this.loadBaseImages()}
+                          >
+                            {this.state.baseImagesLoading ? (
+                              <CircularProgress size={20} />
+                            ) : (
+                              <RefreshIcon fontSize="small" />
+                            )}
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    </Stack>
                     <Autocomplete
                       getOptionLabel={option => option.name}
-                      options={this.state.baseImages}
+                      options={[
+                        ...this.state.binderEnvironmentBaseImages,
+                        ...this.state.flavorBaseImages
+                      ]}
+                      groupBy={option => option.group}
+                      isOptionEqualToValue={(option, value) =>
+                        option.group === value.group &&
+                        option.name === value.name
+                      }
                       disablePortal
                       onChange={(
                         _event: any,
-                        newValue: { name: string; image: IBaseImage } | null
+                        newValue: IBaseImageOption | null
                       ) => {
                         this.updateBaseImage(newValue?.image ?? null);
                       }}

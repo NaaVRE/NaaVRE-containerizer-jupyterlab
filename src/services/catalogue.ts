@@ -11,11 +11,14 @@ declare type CataloguePayloadCreateCell = Omit<
 export declare type ICatalogCell = {
   url: string;
 } & NaaVRECatalogue.WorkflowCells.ICell;
-declare type CatalogueResponse = {
+export declare type ICatalogBinderEnvironment = {
+  url: string;
+} & NaaVRECatalogue.BinderEnvironments.IBinderEnvironment;
+declare type CatalogueResponse<T> = {
   count: number;
   next: string | null;
   previous: string | null;
-  results: ICatalogCell[];
+  results: T[];
 };
 
 async function findCellsInCatalogue({
@@ -24,10 +27,27 @@ async function findCellsInCatalogue({
 }: {
   searchParams: URLSearchParams;
   settings: IVREPanelSettings;
-}): Promise<CatalogueResponse> {
+}): Promise<CatalogueResponse<ICatalogCell>> {
   const resp = await NaaVREExternalService(
     'GET',
     `${settings.catalogueServiceUrl}/workflow-cells/?${searchParams}`
+  );
+  if (resp.status_code !== 200) {
+    throw `${resp.status_code} ${resp.reason}`;
+  }
+  return JSON.parse(resp.content);
+}
+
+async function findBinderEnvironmentsInCatalogue({
+  searchParams,
+  settings
+}: {
+  searchParams: URLSearchParams;
+  settings: IVREPanelSettings;
+}): Promise<CatalogueResponse<ICatalogBinderEnvironment>> {
+  const resp = await NaaVREExternalService(
+    'GET',
+    `${settings.catalogueServiceUrl}/binder-environments/?${searchParams}`
   );
   if (resp.status_code !== 200) {
     throw `${resp.status_code} ${resp.reason}`;
@@ -127,6 +147,18 @@ export async function getContainerizingCells(
   const res = await findCellsInCatalogue({
     searchParams: new URLSearchParams({
       containerization_completed: 'false'
+    }),
+    settings
+  });
+  return res.results;
+}
+
+export async function getBinderEnvironmentsWithContainerImage(
+  settings: IVREPanelSettings
+): Promise<ICatalogBinderEnvironment[]> {
+  const res = await findBinderEnvironmentsInCatalogue({
+    searchParams: new URLSearchParams({
+      has_container_image: 'true'
     }),
     settings
   });

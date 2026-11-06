@@ -9,6 +9,35 @@ import {
   addCellToCatalogueAndLinkPreviousVersion,
   ICatalogCell
 } from '../../services/catalogue';
+import IBaseImage = NaaVRECatalogue.WorkflowCells.IBaseImage;
+
+/**
+ * Return a copy of the base image in one of the formats accepted by the
+ * containerizer `/containerize` endpoint and the catalogue `/workflow-cells/`
+ * endpoint:
+ *  - `{build: string, runtime: string}` (two-stage flavor image), or
+ *  - `{binder_environment: string}` (binder environment image).
+ *
+ * Throws if the base image matches neither format.
+ */
+export function normalizeBaseImage(image: unknown): IBaseImage {
+  if (image !== null && typeof image === 'object') {
+    const obj = image as Record<string, unknown>;
+    const isNonEmptyString = (v: unknown) => typeof v === 'string' && v !== '';
+    const hasFlavorKeys = !!obj.build || !!obj.runtime;
+    const hasBinderKeys = !!obj.binder_environment;
+    const isFlavor =
+      isNonEmptyString(obj.build) && isNonEmptyString(obj.runtime);
+    const isBinder = isNonEmptyString(obj.binder_environment);
+    if (isFlavor && !hasBinderKeys) {
+      return { build: obj.build as string, runtime: obj.runtime as string };
+    }
+    if (isBinder && !hasFlavorKeys) {
+      return { binder_environment: obj.binder_environment as string };
+    }
+  }
+  throw `Invalid base image: ${JSON.stringify(image)}`;
+}
 
 async function triggerCellContainerization(
   cell: NaaVRECatalogue.WorkflowCells.ICell,
@@ -79,6 +108,23 @@ export async function startBuild(
     'in-progress',
     { autoClose: false }
   );
+
+  try {
+    cell = {
+      ...cell,
+      base_container_image: normalizeBaseImage(cell.base_container_image)
+    };
+  } catch (e) {
+    console.error(e);
+    Notification.update({
+      id: notificationId,
+      type: 'error',
+      message: `Failed to containerize ${cell.title}: invalid base image`,
+      autoClose: 5000
+    });
+    return;
+  }
+
   const containerizeResponse = await triggerCellContainerization(
     cell,
     settings,

@@ -11,6 +11,9 @@ export declare type ContainerizeResponse = {
 export declare type StatusResponse = {
   job: NaaVRECatalogue.WorkflowCells.IContainerizationJob;
 };
+export declare type BaseImageTagsResponse = {
+  [name: string]: NaaVRECatalogue.WorkflowCells.ITwoStageFlavorImage;
+};
 
 export async function callContainerizeAPI(
   cell: NaaVRECatalogue.WorkflowCells.ICell,
@@ -50,4 +53,15 @@ export async function callStatusAPI(
   } else {
     throw `${resp.status_code} ${resp.reason}`;
   }
+}
+
+export async function getBaseImageTags(settings: IVREPanelSettings) {
+  const resp = await NaaVREExternalService(
+    'GET',
+    `${settings.containerizerServiceUrl}/base-image-tags?virtual_lab=${settings.virtualLab}`
+  );
+  if (resp.status_code !== 200) {
+    throw `${resp.status_code} ${resp.reason}`;
+  }
+  return JSON.parse(resp.content) as BaseImageTagsResponse;
 }

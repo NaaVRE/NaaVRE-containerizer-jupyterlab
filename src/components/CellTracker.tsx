@@ -28,7 +28,15 @@ import { CellDependenciesTable } from './CellDependenciesTable';
 import { detectType } from '../services/rTypes';
 import { createCell } from './CellCreation';
 import { Collapsible } from './Collapsible';
+import { getBinderEnvironmentsWithContainerImage } from '../services/catalogue';
+import { getBaseImageTags } from '../services/containerizer';
 import IBaseImage = NaaVRECatalogue.WorkflowCells.IBaseImage;
+
+interface IBaseImageOption {
+  name: string;
+  group: 'Flavors' | 'Binder environments';
+  image: IBaseImage;
+}
 
 /**
  * Return a copy of the notebook content without cell outputs.
@@ -73,7 +81,8 @@ interface IExtractorError {
 
 interface IState {
   baseImageSelected: boolean;
-  baseImages: any[];
+  flavorBaseImages: IBaseImageOption[];
+  binderEnvironmentBaseImages: IBaseImageOption[];
   cellAnalyzed: boolean;
   currentCell: NaaVRECatalogue.WorkflowCells.ICell;
   extractorError: string | IExtractorError;
@@ -86,7 +95,8 @@ interface IState {
 
 const DefaultState: IState = {
   baseImageSelected: false,
-  baseImages: [],
+  flavorBaseImages: [],
+  binderEnvironmentBaseImages: [],
   cellAnalyzed: false,
   currentCell: DefaultCell,
   extractorError: '',
@@ -108,34 +118,43 @@ export class CellTracker extends React.Component<IProps, IState> {
   }
 
   loadBaseImages = async () => {
-    NaaVREExternalService(
-      'GET',
-      `${this.props.settings.containerizerServiceUrl}/base-image-tags?virtual_lab=${this.props.settings.virtualLab}`
-    )
-      .then(resp => {
-        if (resp.status_code !== 200) {
-          throw `${resp.status_code} ${resp.reason}`;
-        }
-        return JSON.parse(resp.content);
-      })
-      .then(data => {
-        const updatedBaseImages = Object.entries(data).map(([name, image]) => ({
-          name,
-          image
-        }));
-        console.log('updatedBaseImages');
-        console.log(updatedBaseImages);
-        this.setState({ baseImages: updatedBaseImages });
-      })
-      .catch(reason => {
-        console.log(`Could not retrieve base image tags: ${reason}`);
-        console.log(reason);
-      });
+    await Promise.all([
+      getBaseImageTags(this.props.settings)
+        .then(data =>
+          this.setState({
+            flavorBaseImages: Object.entries(data).map(([name, image]) => ({
+              name,
+              group: 'Flavors',
+              image: { build: image.build, runtime: image.runtime }
+            }))
+          })
+        )
+        .catch(reason => {
+          console.log(`Could not retrieve base image tags: ${reason}`);
+        }),
+      getBinderEnvironmentsWithContainerImage(this.props.settings)
+        .then(environments =>
+          this.setState({
+            binderEnvironmentBaseImages: environments
+              .filter(env => env.container_image !== null)
+              .map(env => ({
+                name: env.binder_ref,
+                group: 'Binder environments',
+                image: { binder_environment: env.container_image as string }
+              }))
+          })
+        )
+        .catch(reason => {
+          console.log(`Could not retrieve binder environments: ${reason}`);
+        })
+    ]);
   };
 
   resetState = () => {
     const newState = DefaultState;
-    newState.baseImages = this.state.baseImages;
+    newState.flavorBaseImages = this.state.flavorBaseImages;
+    newState.binderEnvironmentBaseImages =
+      this.state.binderEnvironmentBaseImages;
     this.setState(newState);
     if (this.cellPreviewRef.current !== null) {
       this.cellPreviewRef.current.updateChart(emptyChart);
@@ -552,11 +571,19 @@ export class CellTracker extends React.Component<IProps, IState> {
                     <p>Base Image</p>
                     <Autocomplete
                       getOptionLabel={option => option.name}
-                      options={this.state.baseImages}
+                      options={[
+                        ...this.state.flavorBaseImages,
+                        ...this.state.binderEnvironmentBaseImages
+                      ]}
+                      groupBy={option => option.group}
+                      isOptionEqualToValue={(option, value) =>
+                        option.group === value.group &&
+                        option.name === value.name
+                      }
                       disablePortal
                       onChange={(
                         _event: any,
-                        newValue: { name: string; image: IBaseImage } | null
+                        newValue: IBaseImageOption | null
                       ) => {
                         this.updateBaseImage(newValue?.image ?? null);
                       }}
